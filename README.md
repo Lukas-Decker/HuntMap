@@ -3,7 +3,7 @@
 A self-contained recreation of the interactive maps at `https://hunt.kamille.ovh/maps/`,
 rebuilt from the captured HAR archive plus a live inspection of the page's DOM and CSS.
 
-Version: **1.1.0**
+Version: **1.1.1**
 
 ---
 
@@ -191,6 +191,23 @@ Outputs land in `compare/`: `REPORT.md`, `SUGGEST.md`, per-map `report-N.json`,
 and with `--overlay` a `overlay-N.json` carrying every matched pair, game-only
 point and map-only POI id.
 
+### Reading the reports in a browser
+
+`tools/serve_compare.py` renders the Markdown as styled HTML in the same
+weathered palette, with a document switcher, a sticky table of contents that
+follows the scroll, and sticky table headers.
+
+```powershell
+python tools/serve_compare.py            # http://127.0.0.1:8778
+python tools/serve_compare.py --open     # and launch a browser
+python tools/serve_compare.py --dir compare --port 9000
+```
+
+The files are re-read on every request, so after re-running the compare tool a
+refresh is enough - no restart. It binds to `127.0.0.1` only, serves the `.md`
+files in that one directory and nothing else, and has no dependencies (the
+small Markdown renderer is built in).
+
 ---
 
 ## 5. Layout
@@ -208,7 +225,9 @@ HuntMap/
 │  ├─ data/                             from the HAR, unmodified except as noted
 │  │  ├─ maps.json  poi-types.json  data-1..4.json  translations.json
 │  └─ images/                           1-4.webp (map art) + 1-4.svg (boundaries)
-├─ tools/compare_game_pois.py           diff vs Hunt-ify game data (read-only)
+├─ tools/
+│  ├─ compare_game_pois.py              diff vs Hunt-ify game data (read-only)
+│  └─ serve_compare.py                  browse the reports at 127.0.0.1:8778
 ├─ compare/                             generated reports (regenerate any time)
 └─ .claude/launch.json
 ```
