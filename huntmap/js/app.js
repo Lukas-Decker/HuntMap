@@ -237,6 +237,7 @@
     panes.namesPane.style.pointerEvents = 'none';
     panes.boundaryPane.style.pointerEvents = 'none';
 
+    /* debug handle: window.HuntMap.map / .S from the console */
     window.HuntMap = { map: map, S: S, px: px, unpx: unpx };
 
     map.on('zoomend', onZoom);
