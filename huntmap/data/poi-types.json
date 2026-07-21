@@ -1,0 +1,112 @@
+{
+    "spawn": {
+        "type": "spawn",
+        "label": "Spawns",
+        "categories": "spawns",
+        "borderColor": "#3b82f6",
+        "fillColor": "#16315e",
+        "radius": 35
+    },
+    "armory": {
+        "type": "armory",
+        "label": "Armories",
+        "categories": "armories",
+        "borderColor": "#9fb4c8",
+        "fillColor": "#38454f",
+        "radius": 20
+    },
+    "tower": {
+        "type": "tower",
+        "label": "Hunting Towers",
+        "categories": "towers",
+        "borderColor": "#d08a4a",
+        "fillColor": "#4f3318",
+        "radius": 20
+    },
+    "big_tower": {
+        "type": "big_tower",
+        "label": "Watch Towers",
+        "categories": "big_towers",
+        "borderColor": "#b87a3e",
+        "fillColor": "#3f2a12",
+        "radius": 20
+    },
+    "workbench": {
+        "type": "workbench",
+        "label": "Workbenches",
+        "categories": "workbenches",
+        "borderColor": "#38bdf8",
+        "fillColor": "#154a63",
+        "radius": 8
+    },
+    "wild_target": {
+        "type": "wild_target",
+        "label": "Wild Targets",
+        "categories": "wild_targets",
+        "borderColor": "#ff5a5a",
+        "fillColor": "#531616",
+        "radius": 18
+    },
+    "brute": {
+        "type": "brute",
+        "label": "Brutes",
+        "categories": "brutes",
+        "borderColor": "#f0883e",
+        "fillColor": "#462913",
+        "radius": 18
+    },
+    "beetle": {
+        "type": "beetle",
+        "label": "Beetles",
+        "categories": "beetles",
+        "borderColor": "#b06cff",
+        "fillColor": "#321a5a",
+        "radius": 8
+    },
+    "easter_egg": {
+        "type": "easter_egg",
+        "label": "Easter Eggs",
+        "categories": "easter_eggs",
+        "borderColor": "#57d98a",
+        "fillColor": "#134e2a",
+        "radius": 8
+    },
+    "melee_weapon": {
+        "type": "melee_weapon",
+        "label": "Melee Weapons",
+        "categories": "melee_weapons",
+        "borderColor": "#fb7185",
+        "fillColor": "#531426",
+        "radius": 8
+    },
+    "cash_register": {
+        "type": "cash_register",
+        "label": "Cash Registers",
+        "categories": "cash_registers",
+        "borderColor": "#ffcc40",
+        "fillColor": "#4d3a0e",
+        "radius": 8,
+        "levels": {
+            "0": "White",
+            "1": "PaleGreen",
+            "2": "SkyBlue",
+            "3": "MediumPurple"
+        }
+    },
+    "compound": {
+        "type": "compound",
+        "label": "Compounds",
+        "categories": "compounds",
+        "borderColor": "#b6c0cc",
+        "fillColor": "#3a4048",
+        "radius": 25
+    },
+    "extraction": {
+        "type": "extraction",
+        "label": "Extraction",
+        "categories": "extractions",
+        "borderColor": "#2dd4bf",
+        "fillColor": "#0e3b38",
+        "radius": 30
+    }
+}

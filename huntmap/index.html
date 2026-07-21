@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Interactive Map - Hunt Showdown</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="maps-body">
+
+<a class="skip-link" href="#map">Skip to map</a>
+
+<!-- ============================ TOP BAR ============================ -->
+<header class="topbar">
+  <div class="topbar-left">
+    <button id="railToggle" class="icon-btn" type="button" title="Filters" aria-label="Filters">
+      <svg viewBox="0 0 24 24"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+    </button>
+    <span id="mapTitle" class="topbar-title">Interactive Map</span>
+  </div>
+
+  <div class="topbar-center">
+    <div class="search-box">
+      <svg class="search-ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>
+      <input id="searchInput" type="search" autocomplete="off" spellcheck="false" placeholder="Location">
+      <button id="searchClear" class="search-clear" type="button" aria-label="Clear">&times;</button>
+      <div id="searchResults" class="search-results" hidden></div>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <button id="settingsBtn" class="icon-btn" type="button" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.6v3M12 18.4v3M2.6 12h3M18.4 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/></svg>
+    </button>
+    <div id="langSwitcher" class="lang-switcher">
+      <button id="langToggle" class="lang-toggle" type="button">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>
+        <span id="langCurrent">EN</span>
+      </button>
+      <div id="langMenu" class="lang-menu">
+        <button type="button" data-lang="en">English</button>
+        <button type="button" data-lang="fr">Fran&ccedil;ais</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============================ MAIN ============================ -->
+<main id="mapsMain" class="maps-main">
+
+  <div id="railScrim" class="rail-scrim"></div>
+
+  <!-- ------------------------- LEFT RAIL ------------------------- -->
+  <aside id="mapsRail" class="maps-rail">
+
+    <section class="rail-section">
+      <h2 class="rail-title" data-i18n="choose_map">Choose a map</h2>
+      <div id="mapSelector" class="map-selector"></div>
+    </section>
+
+    <section class="rail-section filter-panel">
+      <div class="filter-panel-head">
+        <h2 class="rail-title" data-i18n="filters">Filters</h2>
+        <button id="filterToggleAll" class="filter-toggle-all" type="button" data-i18n="disable_all">Disable all</button>
+      </div>
+
+      <div id="filterChips" class="filter-rows"></div>
+
+      <div id="filterExtra" class="filter-extra">
+        <button class="filter-row is-on" type="button" data-extra="names">
+          <span class="filter-row-ico">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h13"/></svg>
+          </span>
+          <span class="filter-row-label" data-i18n="opt_names">Names</span>
+          <span class="switch is-on"></span>
+        </button>
+        <button class="filter-row is-on" type="button" data-extra="compounds">
+          <span class="filter-row-ico">
+            <svg viewBox="0 0 24 24"><path d="M4 10l8-6 8 6v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>
+          </span>
+          <span class="filter-row-label" data-i18n="opt_compounds">Compounds</span>
+          <span class="switch is-on"></span>
+        </button>
+      </div>
+
+      <div class="filter-image">
+        <span class="filter-image-label">
+          <svg viewBox="0 0 24 24"><path d="M3 8h4l1.5-2h7L17 8h4v11H3z"/><circle cx="12" cy="13" r="3.4"/></svg>
+          <span data-i18n="photos">Screenshots</span>
+        </span>
+        <div class="seg filter-image-seg">
+          <button class="seg-btn is-on" type="button" data-photo="all"     data-i18n="photo_all">All</button>
+          <button class="seg-btn"       type="button" data-photo="has"     data-i18n="photo_has">w/</button>
+          <button class="seg-btn"       type="button" data-photo="missing" data-i18n="photo_missing">w/o</button>
+        </div>
+      </div>
+
+      <div class="filter-foot">
+        <span id="filterCount" class="filter-count"></span>
+        <span id="filterMissing" class="filter-missing"></span>
+      </div>
+    </section>
+  </aside>
+
+  <!-- ------------------------- MAP STAGE ------------------------- -->
+  <div id="mapStage" class="map-stage">
+
+    <div id="map"></div>
+    <div id="edgeFade" class="edge-fade"></div>
+
+    <!-- zoom -->
+    <div class="map-zoom">
+      <button id="zoomIn"  class="zoom-btn" type="button" aria-label="Zoom in">+</button>
+      <button id="zoomOut" class="zoom-btn" type="button" aria-label="Zoom out">&minus;</button>
+      <button id="zoomFit" class="zoom-btn zoom-fit" type="button" aria-label="Fit">
+        <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      </button>
+    </div>
+
+    <!-- scale + compass -->
+    <div id="mapScale" class="map-scale">100 m</div>
+    <div class="map-compass" aria-hidden="true">
+      <svg viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="26"/>
+        <polygon class="needle-n" points="32,9 37,32 32,27 27,32"/>
+        <polygon class="needle-s" points="32,55 27,32 32,37 37,32"/>
+        <circle class="hub" cx="32" cy="32" r="2.6"/>
+        <text x="32" y="7.5">N</text><text x="58" y="35">E</text>
+        <text x="32" y="62">S</text><text x="6"  y="35">W</text>
+      </svg>
+    </div>
+
+    <!-- tools -->
+    <nav id="toolPalette" class="tool-palette">
+      <button class="tool-btn is-on" type="button" data-tool="select" data-i18n-title="tool_select">
+        <svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.6L10 20z"/></svg>
+        <span class="tool-label" data-i18n="tool_select">Select</span>
+      </button>
+      <button class="tool-btn" type="button" data-tool="ruler" data-i18n-title="tool_ruler">
+        <svg viewBox="0 0 24 24"><path d="M3.6 14.5L14.5 3.6l5.9 5.9L9.5 20.4z"/><path d="M7 11l2 2M10 8l2 2M13 5l2 2"/></svg>
+        <span class="tool-label" data-i18n="tool_ruler">Ruler</span>
+      </button>
+      <button class="tool-btn" type="button" data-tool="route" data-i18n-title="tool_route">
+        <svg viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.6"/><circle cx="18" cy="6" r="2.6"/><path d="M8.4 16.6C12 14 12 10 15.6 8.4"/></svg>
+        <span class="tool-label" data-i18n="tool_route">Route</span>
+      </button>
+      <button class="tool-btn" type="button" data-tool="spotlight" data-i18n-title="tool_spotlight">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        <span class="tool-label" data-i18n="tool_spotlight">Spotlight</span>
+      </button>
+      <button class="tool-btn" type="button" data-tool="fullscreen" data-i18n-title="tool_fullscreen">
+        <svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+        <span class="tool-label" data-i18n="tool_fullscreen">Fullscreen</span>
+      </button>
+      <button class="tool-btn" type="button" data-tool="help" data-i18n-title="tool_help">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.4 9.2a2.7 2.7 0 1 1 3.4 2.6c-.6.2-.8.7-.8 1.3v.5"/><circle class="dot" cx="12" cy="17" r="1.1"/></svg>
+        <span class="tool-label" data-i18n="tool_help">Help</span>
+      </button>
+    </nav>
+
+    <!-- transient tool hint -->
+    <div id="toolHint" class="tool-hint" hidden>
+      <span id="toolHintText"></span>
+      <button id="toolHintFinish" class="btn btn-mini" type="button" hidden></button>
+      <button id="toolHintCancel" class="btn btn-mini btn-ghost" type="button"></button>
+    </div>
+
+    <!-- fullscreen exit -->
+    <button id="fsExit" class="maps-fs-exit" type="button">
+      <svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+      <span data-i18n="fs_exit">Exit fullscreen</span>
+    </button>
+
+    <!-- hover preview -->
+    <figure id="imagePopup" class="image-popup" hidden>
+      <img alt="">
+      <figcaption></figcaption>
+    </figure>
+
+    <!-- spotlight -->
+    <svg id="spotlightOverlay" class="spotlight-overlay" hidden>
+      <defs>
+        <mask id="spotlight-mask">
+          <rect x="0" y="0" width="100%" height="100%" fill="#fff"/>
+          <circle id="spotlightHole" cx="-999" cy="-999" r="150" fill="#000"/>
+        </mask>
+      </defs>
+      <rect x="0" y="0" width="100%" height="100%" fill="rgba(0,0,0,.72)" mask="url(#spotlight-mask)"/>
+    </svg>
+
+    <!-- image viewer -->
+    <div id="imageViewer" class="image-viewer" hidden>
+      <button id="ivClose" class="iv-close" type="button" aria-label="Close">&times;</button>
+      <button id="ivPrev" class="iv-nav iv-prev" type="button" aria-label="Previous">&#10094;</button>
+      <img id="ivImage" alt="">
+      <button id="ivNext" class="iv-nav iv-next" type="button" aria-label="Next">&#10095;</button>
+      <div id="ivCounter" class="iv-counter"></div>
+    </div>
+
+    <div id="mapToasts" class="map-toasts"></div>
+  </div>
+
+  <!-- ------------------------- SIDE PANEL ------------------------- -->
+  <aside id="sidePanel" class="side-panel">
+    <div id="panelEmpty" class="side-panel-empty">
+      <svg viewBox="0 0 24 24"><path d="M12 21s7-6.3 7-11a7 7 0 1 0-14 0c0 4.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+      <p data-i18n="panel_empty">Select a POI to see its details.</p>
+    </div>
+    <div id="panelBody" class="side-panel-body" hidden></div>
+  </aside>
+</main>
+
+<!-- ============================ MODALS ============================ -->
+<div id="helpModal" class="map-modal" hidden>
+  <div class="map-modal-card">
+    <div class="map-modal-head">
+      <h2 data-i18n="help_title">How to contribute</h2>
+      <button class="map-modal-close" type="button">&times;</button>
+    </div>
+    <div class="map-modal-body">
+      <p data-i18n="help_intro"></p>
+      <ol class="help-steps">
+        <li data-i18n="help_step1"></li>
+        <li data-i18n="help_step2"></li>
+        <li data-i18n="help_step3"></li>
+      </ol>
+      <p class="muted" data-i18n="help_outro"></p>
+      <h3 class="modal-sub">Keyboard</h3>
+      <ul class="kbd-list">
+        <li><kbd>1</kbd>-<kbd>6</kbd> tools</li>
+        <li><kbd>F</kbd> fullscreen</li>
+        <li><kbd>Enter</kbd> finish route</li>
+        <li><kbd>Esc</kbd> cancel / close</li>
+        <li><kbd>+</kbd> / <kbd>-</kbd> zoom</li>
+        <li><kbd>/</kbd> search</li>
+      </ul>
+    </div>
+    <div class="map-modal-foot">
+      <button class="btn btn-primary map-modal-close" type="button" data-i18n="ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="settingsModal" class="map-modal" hidden>
+  <div class="map-modal-card">
+    <div class="map-modal-head">
+      <h2 data-i18n="settings">Settings</h2>
+      <button class="map-modal-close" type="button">&times;</button>
+    </div>
+    <div class="map-modal-body">
+      <label class="opt-row">
+        <span data-i18n="opt_edge_fade">Edge fade</span>
+        <input type="checkbox" id="optEdgeFade" class="opt-check">
+      </label>
+      <label class="opt-row">
+        <span data-i18n="opt_icon_frame">Icon outline</span>
+        <input type="checkbox" id="optIconFrame" class="opt-check">
+      </label>
+      <div class="opt-row opt-row-col">
+        <span data-i18n="opt_popup_size">Hover image size</span>
+        <div class="seg" id="optPopupSize">
+          <button class="seg-btn" type="button" data-size="s">S</button>
+          <button class="seg-btn is-on" type="button" data-size="m">M</button>
+          <button class="seg-btn" type="button" data-size="l">L</button>
+        </div>
+      </div>
+      <div class="opt-row opt-row-col">
+        <span data-i18n="opt_poi_click">POI click</span>
+        <div class="seg" id="optPoiClick">
+          <button class="seg-btn is-on" type="button" data-click="viewer" data-i18n="opt_poi_click_viewer">Open the image viewer</button>
+          <button class="seg-btn" type="button" data-click="panel" data-i18n="opt_poi_click_panel">Open the info panel</button>
+        </div>
+      </div>
+      <hr class="opt-sep">
+      <button id="clearRuler" class="btn btn-ghost btn-wide" type="button" data-i18n="ruler_clear">Clear ruler</button>
+      <button id="clearRoutes" class="btn btn-ghost btn-wide" type="button" data-i18n="route_clear">Clear routes</button>
+      <button id="clearHighlights" class="btn btn-ghost btn-wide" type="button">Clear highlights</button>
+    </div>
+    <div class="map-modal-foot">
+      <button class="btn btn-primary map-modal-close" type="button" data-i18n="ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="js/icons.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

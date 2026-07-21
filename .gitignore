@@ -1,0 +1,9 @@
+# derived from the HAR, regenerate with the snippet in README section 1
+har_extract/
+
+# editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
