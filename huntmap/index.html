@@ -268,6 +268,13 @@
         </div>
       </div>
       <div class="opt-row opt-row-col">
+        <span>Marker palette</span>
+        <div class="seg" id="optPalette">
+          <button class="seg-btn is-on" type="button" data-palette="warm">Weathered</button>
+          <button class="seg-btn" type="button" data-palette="site">Original</button>
+        </div>
+      </div>
+      <div class="opt-row opt-row-col">
         <span data-i18n="opt_poi_click">POI click</span>
         <div class="seg" id="optPoiClick">
           <button class="seg-btn is-on" type="button" data-click="viewer" data-i18n="opt_poi_click_viewer">Open the image viewer</button>
@@ -287,6 +294,7 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="js/theme.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/app.js"></script>
 </body>

@@ -1,7 +1,10 @@
 /* ==================================================================
  * Hunt Showdown interactive map - styles
- * Dark "field notebook" look: near-black blues, teal accent, gold for
- * secondary highlights, serif small-caps headings.
+ *
+ * Weathered gothic theme, palette adopted from the sibling HuntWiki
+ * project (../../HuntWiki/site/css/style.css): smoked browns, tallow
+ * gold as the primary accent, blood red as the secondary, moss green
+ * for "all done" states. Georgia for headings.
  * ================================================================== */
 
 :root {
@@ -9,37 +12,58 @@
   --rail-w: 290px;
   --panel-w: 340px;
 
-  --bg: #00050f;
-  --bg-deep: #000308;
-  --surface: #061019;
-  --surface-2: #0a1722;
-  --surface-3: #102230;
-  --border: rgba(255, 255, 255, .06);
-  --border-hi: rgba(65, 219, 188, .35);
+  /* --- HuntWiki base ------------------------------------------- */
+  --bg: #100e0b;
+  --bg-deep: #0a0907;
+  --surface: #1c1813;          /* HuntWiki --panel   */
+  --surface-2: #241f18;        /* HuntWiki --panel-2 */
+  --surface-3: #2c261d;        /* HuntWiki --panel-hi */
+  --border: #382f23;           /* HuntWiki --line    */
+  --border-hi: #7a6132;        /* warm hover edge, between --line-hi and --gold */
 
-  --text: #dfe4ea;
-  --text-strong: #fff;
-  --text-muted: #93a2b1;
-  --text-dim: #5a6678;
+  --text: #ddd0ba;             /* HuntWiki --ink      */
+  --text-strong: #f0e6d2;
+  --text-muted: #8b8070;       /* HuntWiki --muted    */
+  --text-dim: #6a6153;         /* HuntWiki --faint    */
 
-  --accent: #2ec7a5;
-  --accent-hi: #41dbbc;
-  --accent-dim: #1f8a73;
-  --accent-glow: rgba(65, 219, 188, .14);
+  /* gold is now the primary accent */
+  --accent: #c9a24b;           /* HuntWiki --gold     */
+  --accent-hi: #e6c876;        /* HuntWiki --gold-hi  */
+  --accent-dim: #6b552a;
+  --accent-glow: rgba(201, 162, 75, .18);
+  --on-accent: #14110c;        /* ink laid on top of a gold fill */
 
-  --gold: #b8913e;
-  --gold-hi: #d8b96a;
+  /* blood red takes over as the secondary highlight (routes, marks) */
+  --gold: #a83828;             /* HuntWiki --blood    */
+  --gold-hi: #c9503b;          /* HuntWiki --blood-hi */
 
-  --danger: #b04a44;
+  --danger: #a83828;
+  --success: #7f9b53;          /* HuntWiki --green    */
 
-  --radius-sm: 4px;
-  --radius: 8px;
-  --radius-lg: 12px;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, .4);
-  --shadow: 0 12px 30px rgba(0, 0, 0, .55);
+  /* --- washes -------------------------------------------------- */
+  --scrim-92: rgba(16, 14, 11, .94);
+  --scrim-80: rgba(16, 14, 11, .82);
+  --scrim-50: rgba(16, 14, 11, .55);
+  --scrim-45: rgba(16, 14, 11, .5);
+  --scrim-20: rgba(16, 14, 11, .22);
+  --deep-92: rgba(10, 9, 7, .93);
+  --deep-85: rgba(10, 9, 7, .82);
+  --deep-72: rgba(10, 9, 7, .74);
+  --deep-60: rgba(10, 9, 7, .62);
+  --panel-94: rgba(28, 24, 19, .96);
+  --panel-80: rgba(28, 24, 19, .84);
+  --hairline: rgba(221, 208, 186, .06);
+  --compass-ring: rgba(221, 208, 186, .32);
+  --compass-needle: rgba(221, 208, 186, .5);
 
-  --font-serif: "Cormorant Garamond", Cormorant, Georgia, "Times New Roman", serif;
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --radius-sm: 3px;
+  --radius: 4px;
+  --radius-lg: 6px;
+  --shadow-sm: 0 3px 10px rgba(0, 0, 0, .5);
+  --shadow: 0 8px 30px rgba(0, 0, 0, .55);   /* HuntWiki --shadow */
+
+  --font-serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, monospace;
 }
 
@@ -53,7 +77,10 @@ html, body {
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, #1d1811 0%, transparent 60%),
+    linear-gradient(180deg, #12100c 0%, #0c0a08 100%);
+  background-attachment: fixed;
   color: var(--text);
   font: 14px/1.45 var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -63,7 +90,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 
 .skip-link {
   position: absolute; left: -9999px; top: 0; z-index: 3000;
-  background: var(--accent); color: #00050f; padding: 8px 14px;
+  background: var(--accent); color: var(--on-accent); padding: 8px 14px;
 }
 .skip-link:focus { left: 8px; top: 8px; }
 
@@ -80,7 +107,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
   transition: background .15s, border-color .15s, color .15s;
 }
 .btn:hover { background: var(--surface-3); border-color: var(--border-hi); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #00050f; font-weight: 600; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 .btn-primary:hover { background: var(--accent-hi); border-color: var(--accent-hi); }
 .btn-ghost { background: transparent; }
 .btn-wide { width: 100%; }
@@ -217,7 +244,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 .map-card:hover .map-card-img { transform: scale(1.06); }
 .map-card-scrim {
   position: absolute; inset: 0;
-  background: linear-gradient(90deg, rgba(0, 5, 15, .92) 0%, rgba(0, 5, 15, .45) 60%, rgba(0, 5, 15, .2) 100%);
+  background: linear-gradient(90deg, var(--scrim-92) 0%, var(--scrim-45) 60%, var(--scrim-20) 100%);
 }
 .map-card-overlay {
   position: absolute; inset: 0; padding: 10px 12px;
@@ -231,7 +258,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 .map-card-check {
   position: absolute; right: 9px; top: 9px; width: 20px; height: 20px;
   display: grid; place-items: center; border-radius: 50%;
-  background: var(--accent); color: #00050f; font-size: 12px; font-weight: 700;
+  background: var(--accent); color: var(--on-accent); font-size: 12px; font-weight: 700;
   opacity: 0; transform: scale(.6); transition: .16s;
 }
 .map-card.is-selected .map-card-check { opacity: 1; transform: scale(1); }
@@ -299,12 +326,12 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
   padding: 3px 9px; border-radius: 3px; cursor: pointer; font: inherit; font-size: 12px;
 }
 .seg-btn:hover { color: var(--text); }
-.seg-btn.is-on { background: var(--accent-dim); color: #eafff9; }
+.seg-btn.is-on { background: var(--accent-dim); color: var(--on-accent); }
 
 .filter-foot { margin-top: 12px; display: flex; flex-direction: column; gap: 3px; }
 .filter-count { font-size: 12px; color: var(--text-muted); }
 .filter-missing { font-size: 11px; color: var(--gold); }
-.filter-missing.is-done { color: var(--accent); }
+.filter-missing.is-done { color: var(--success); }
 
 /* ============================== map stage ========================== */
 
@@ -317,7 +344,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 
 .edge-fade {
   position: absolute; inset: 0; pointer-events: none; z-index: 420;
-  box-shadow: inset 0 0 120px 40px rgba(0, 3, 8, .85);
+  box-shadow: inset 0 0 120px 40px var(--deep-85);
 }
 body.no-edge-fade .edge-fade { display: none; }
 
@@ -334,7 +361,7 @@ body.no-edge-fade .edge-fade { display: none; }
   background: var(--surface-2); color: var(--text); cursor: pointer;
   font-size: 17px; line-height: 1;
 }
-.zoom-btn:hover { background: var(--accent); color: #00050f; }
+.zoom-btn:hover { background: var(--accent); color: var(--on-accent); }
 .zoom-btn svg { width: 15px; height: 15px; }
 
 /* scale + compass -------------------------------------------------- */
@@ -350,10 +377,10 @@ body.no-edge-fade .edge-fade { display: none; }
   width: 58px; height: 58px; opacity: .92; pointer-events: none;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .8));
 }
-.map-compass circle { stroke: rgba(223, 228, 234, .35); fill: rgba(0, 5, 15, .5); }
+.map-compass circle { stroke: var(--compass-ring); fill: var(--scrim-50); }
 .map-compass .hub { fill: var(--text-muted); stroke: none; }
 .map-compass .needle-n { fill: var(--danger); stroke: none; }
-.map-compass .needle-s { fill: rgba(223, 228, 234, .55); stroke: none; }
+.map-compass .needle-s { fill: var(--compass-needle); stroke: none; }
 .map-compass text {
   fill: var(--text-muted); stroke: none; font-size: 9px; font-weight: 700;
   text-anchor: middle; font-family: var(--font-sans);
@@ -371,7 +398,7 @@ body.no-edge-fade .edge-fade { display: none; }
   background: var(--surface-2); color: var(--text-muted); cursor: pointer;
 }
 .tool-btn:hover { background: var(--surface-3); color: var(--text-strong); }
-.tool-btn.is-on { background: var(--accent); color: #00050f; }
+.tool-btn.is-on { background: var(--accent); color: var(--on-accent); }
 .tool-btn svg { width: 19px; height: 19px; }
 .tool-btn .dot { fill: currentColor; stroke: none; }
 .tool-label {
@@ -388,7 +415,7 @@ body.no-edge-fade .edge-fade { display: none; }
   position: absolute; left: 50%; top: 14px; transform: translateX(-50%); z-index: 610;
   display: flex; align-items: center; gap: 10px;
   padding: 7px 12px; border-radius: 999px;
-  background: rgba(6, 16, 25, .94); border: 1px solid var(--border-hi);
+  background: var(--panel-94); border: 1px solid var(--border-hi);
   box-shadow: var(--shadow-sm); font-size: 13px; color: var(--text);
 }
 
@@ -396,7 +423,7 @@ body.no-edge-fade .edge-fade { display: none; }
 .maps-fs-exit {
   position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 620;
   display: none; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px;
-  background: rgba(6, 16, 25, .94); border: 1px solid var(--border-hi);
+  background: var(--panel-94); border: 1px solid var(--border-hi);
   color: var(--text); cursor: pointer; font: inherit; font-size: 13px;
 }
 .maps-fs-exit svg { width: 15px; height: 15px; }
@@ -432,7 +459,7 @@ body.is-fs .maps-rail, body.is-fs .side-panel { display: none; }
   box-shadow: 0 0 0 3px var(--accent-glow), 0 4px 14px rgba(0, 0, 0, .7);
 }
 .poi-marker.is-marked { box-shadow: 0 0 0 2px var(--gold), 0 2px 8px rgba(0, 0, 0, .6); }
-.poi-marker.is-boss { border-width: 3px; }
+.poi-marker.is-landmark { border-width: 3px; border-style: dotted; }
 .poi-marker.no-photo { border-style: dashed; }
 
 .poi-glyph { width: 1em; height: 1em; fill: currentColor; stroke: none; }
@@ -463,14 +490,14 @@ body.no-icon-frame .poi-marker .poi-glyph { filter: drop-shadow(0 1px 3px #000);
   color: #fff; text-shadow: 3px 3px 2px #000, 0 0 6px #000;
   pointer-events: none;
 }
-.marker-label_text.is-boss { color: var(--gold-hi); }
+.marker-label_text.is-landmark { color: var(--text-muted); }
 
 /* alt (screenshot vantage) marker ---------------------------------- */
 .alt-divicon { background: none; border: 0; }
 .alt-marker {
   display: grid; place-items: center; width: 22px; height: 22px;
   border-radius: 50%; border: 1px dashed var(--accent-hi);
-  background: rgba(0, 5, 15, .8); color: var(--accent-hi);
+  background: var(--scrim-80); color: var(--accent-hi);
 }
 .alt-marker .ui-ico { width: 12px; height: 12px; }
 
@@ -479,7 +506,7 @@ body.no-icon-frame .poi-marker .poi-glyph { filter: drop-shadow(0 1px 3px #000);
 .dist-label {
   display: inline-block; white-space: nowrap;
   padding: 2px 7px; border-radius: var(--radius-sm);
-  background: rgba(6, 16, 25, .92); border: 1px solid var(--border-hi);
+  background: var(--panel-94); border: 1px solid var(--border-hi);
   color: var(--accent-hi); font: 600 11px/1.4 var(--font-mono);
 }
 .dist-label.is-route { border-color: var(--gold); color: var(--gold-hi); }
@@ -507,7 +534,7 @@ body.no-icon-frame .poi-marker .poi-glyph { filter: drop-shadow(0 1px 3px #000);
 .image-viewer {
   position: absolute; inset: 0; z-index: 1500;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(0, 3, 8, .92); padding: 40px;
+  background: var(--deep-92); padding: 40px;
 }
 #ivImage { max-width: 100%; max-height: 100%; border-radius: var(--radius); box-shadow: var(--shadow); }
 .iv-close {
@@ -519,7 +546,7 @@ body.no-icon-frame .poi-marker .poi-glyph { filter: drop-shadow(0 1px 3px #000);
 .iv-nav {
   position: absolute; top: 50%; transform: translateY(-50%);
   width: 42px; height: 60px; border: 1px solid var(--border); border-radius: var(--radius);
-  background: rgba(6, 16, 25, .8); color: var(--text); cursor: pointer; font-size: 18px;
+  background: var(--panel-80); color: var(--text); cursor: pointer; font-size: 18px;
 }
 .iv-nav:hover { border-color: var(--border-hi); color: var(--accent-hi); }
 .iv-prev { left: 14px; }
@@ -537,7 +564,7 @@ body.no-icon-frame .poi-marker .poi-glyph { filter: drop-shadow(0 1px 3px #000);
 }
 .map-toast {
   padding: 8px 14px; border-radius: 999px;
-  background: rgba(6, 16, 25, .96); border: 1px solid var(--border-hi);
+  background: var(--panel-94); border: 1px solid var(--border-hi);
   color: var(--text); font-size: 13px; box-shadow: var(--shadow-sm);
   animation: toast-in .18s ease-out;
 }
@@ -605,7 +632,7 @@ body.no-icon-frame .poi-marker .poi-glyph { filter: drop-shadow(0 1px 3px #000);
 .panel-meta { border-top: 1px solid var(--border); padding-top: 4px; }
 .meta-row {
   display: flex; justify-content: space-between; gap: 10px;
-  padding: 5px 0; font-size: 12px; border-bottom: 1px dashed rgba(255, 255, 255, .04);
+  padding: 5px 0; font-size: 12px; border-bottom: 1px dashed var(--hairline);
 }
 .meta-row span { color: var(--text-dim); }
 .meta-row b { color: var(--text); font-weight: 600; }
@@ -619,7 +646,7 @@ body.no-icon-frame .poi-marker .poi-glyph { filter: drop-shadow(0 1px 3px #000);
 .map-modal {
   position: fixed; inset: 0; z-index: 2000;
   display: flex; align-items: center; justify-content: center; padding: 20px;
-  background: rgba(0, 3, 8, .72);
+  background: var(--deep-72);
 }
 .map-modal-card {
   width: min(520px, 100%); max-height: 86vh; overflow: auto;
@@ -683,7 +710,7 @@ kbd {
   body.rail-open .maps-rail { transform: none; }
   body.rail-open .rail-scrim {
     display: block; position: fixed; inset: var(--topbar-h) 0 0 0;
-    background: rgba(0, 3, 8, .6); z-index: 950;
+    background: var(--deep-60); z-index: 950;
   }
   .side-panel { width: min(340px, 92vw); }
   .topbar-title { display: none; }

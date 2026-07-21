@@ -7,3 +7,6 @@ Thumbs.db
 *.swp
 .vscode/
 .idea/
+
+# generated reports - regenerate with tools/compare_game_pois.py
+compare/*.json

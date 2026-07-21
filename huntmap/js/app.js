@@ -4,6 +4,9 @@
  * Data model (from maps/cache/*.json):
  *   data-N.json = { i, n, m, o, <category>: [ { c:[x,y], d?, u?[], x?[x,y], n?, z?, id } ] }
  *   c  = position in image pixels on a 4096 x 4096 map image
+ *   z  = compounds only: true marks a LANDMARK (no boss lair).
+ *        Confirmed against Hunt-ify: the 3 z=true entries per map
+ *        are exactly its landmark list, the other 13 are the lairs.
  *   u  = screenshot URLs (absolute, or relative to the origin site)
  *   x  = secondary coordinate, treated here as the vantage point of the
  *        screenshot and only drawn while the POI is selected
@@ -47,7 +50,7 @@
     on: {},                 // type -> bool
     extra: { names: true, compounds: true },
     photo: 'all',           // all | has | missing
-    opts: { edgeFade: true, iconFrame: true, popupSize: 'm', poiClick: 'viewer' },
+    opts: { edgeFade: true, iconFrame: true, popupSize: 'm', poiClick: 'viewer', palette: 'warm' },
     marks: {},              // mapId -> { id: true }
     tool: 'select',
     selected: null,
@@ -102,6 +105,22 @@
       if (!r.ok) throw new Error(url + ' -> ' + r.status);
       return r.json();
     });
+  }
+
+  /* a colour from the stylesheet, so JS-drawn overlays follow the theme */
+  function ink(varName) {
+    return window.HuntTheme.cssVar(varName, '#c9a24b');
+  }
+
+  /* themed colours for a POI type - see js/theme.js */
+  function typeColors(type) {
+    return window.HuntTheme.colors(type, S.types[type], S.opts.palette);
+  }
+
+  /* inline style block shared by markers, filter rows, panel and hits */
+  function colorVars(type) {
+    var c = typeColors(type);
+    return '--poi-border:' + c.borderColor + ';--poi-fill:' + c.fillColor;
   }
 
   function imgUrl(u) {
@@ -330,7 +349,7 @@
       (d[key] || []).forEach(function (raw) {
         var p = {
           id: raw.id, type: type, c: raw.c, d: raw.d || '',
-          u: raw.u || [], alt: raw.x || null, name: raw.n || '', boss: !!raw.z
+          u: raw.u || [], alt: raw.x || null, name: raw.n || '', landmark: !!raw.z
         };
         S.pois.push(p);
         S.byId[p.id] = p;
@@ -357,16 +376,13 @@
   }
 
   function makeIcon(p) {
-    var def = S.types[p.type];
     var size = markerSize(p.type);
     var glyph = (window.HuntIcons.GLYPHS[p.type] || '');
     var cls = 'poi-marker'
       + (isMarked(p.id) ? ' is-marked' : '')
-      + (p.boss ? ' is-boss' : '')
+      + (p.landmark ? ' is-landmark' : '')
       + (p.u.length || p.type === 'compound' ? '' : ' no-photo');
-    var html = '<span class="' + cls + '" style="'
-      + '--poi-border:' + def.borderColor + ';'
-      + '--poi-fill:' + def.fillColor + ';'
+    var html = '<span class="' + cls + '" style="' + colorVars(p.type) + ';'
       + 'font-size:' + Math.max(8, Math.round(size * 0.46)) + 'px">'
       + glyph
       + (p.u.length > 1 ? '<i class="poi-badge">' + p.u.length + '</i>' : '')
@@ -431,7 +447,7 @@
         interactive: false,
         icon: L.divIcon({
           className: 'compound-label',
-          html: '<span class="marker-label_text' + (p.boss ? ' is-boss' : '') + '">' + esc(p.name) + '</span>',
+          html: '<span class="marker-label_text' + (p.landmark ? ' is-landmark' : '') + '">' + esc(p.name) + '</span>',
           iconSize: [12, 12], iconAnchor: [6, 40]
         })
       });
@@ -527,9 +543,8 @@
     var chips = $('#filterChips');
     chips.innerHTML = S.typeOrder.filter(function (k) { return k !== 'compound'; })
       .map(function (k) {
-        var def = S.types[k];
         return '<button class="filter-row' + (S.on[k] ? ' is-on' : '') + '" type="button" data-type="' + k + '"'
-             + ' style="--poi-border:' + def.borderColor + ';--poi-fill:' + def.fillColor + '">'
+             + ' style="' + colorVars(k) + '">'
              +   '<span class="filter-row-ico">' + (window.HuntIcons.GLYPHS[k] || '') + '</span>'
              +   '<span class="filter-row-label" data-poi-label="' + k + '"></span>'
              +   '<span class="filter-row-count"></span>'
@@ -646,7 +661,7 @@
     if (!p || !p.alt) return;
     altLayer = L.layerGroup([], { pane: 'altPane' }).addTo(map);
     L.polyline([px(p.c), px(p.alt)], {
-      pane: 'altPane', color: '#41dbbc', weight: 1.5, dashArray: '4 4', opacity: 0.8, interactive: false
+      pane: 'altPane', color: ink('--accent-hi'), weight: 1.5, dashArray: '4 4', opacity: 0.8, interactive: false
     }).addTo(altLayer);
     L.marker(px(p.alt), {
       pane: 'altPane', interactive: false,
@@ -668,11 +683,11 @@
     }).join('');
 
     var html =
-      '<header class="panel-head" style="--poi-border:' + def.borderColor + ';--poi-fill:' + def.fillColor + '">'
+      '<header class="panel-head" style="' + colorVars(p.type) + '">'
       +  '<span class="panel-badge">' + (window.HuntIcons.GLYPHS[p.type] || '') + '</span>'
       +  '<div class="panel-head-text">'
       +    '<h2>' + esc(title) + '</h2>'
-      +    '<span class="panel-sub">' + esc(names[p.type] || def.label) + (p.boss ? ' &middot; boss lair' : '') + '</span>'
+      +    '<span class="panel-sub">' + esc(names[p.type] || def.label) + (p.type === 'compound' ? (p.landmark ? ' &middot; landmark' : ' &middot; boss lair') : '') + '</span>'
       +  '</div>'
       +  '<button class="panel-close" type="button" aria-label="Close">&times;</button>'
       + '</header>'
@@ -861,11 +876,11 @@
     var pts = draft.pts.concat(draft.hover ? [draft.hover] : []);
     draftLayer = L.layerGroup([], { pane: 'measurePane' }).addTo(map);
     L.polyline(pts.map(px), {
-      pane: 'measurePane', color: '#41dbbc', weight: 2, dashArray: '5 5', interactive: false
+      pane: 'measurePane', color: ink('--accent-hi'), weight: 2, dashArray: '5 5', interactive: false
     }).addTo(draftLayer);
     pts.forEach(function (p) {
       L.circleMarker(px(p), {
-        pane: 'measurePane', radius: 3.5, color: '#41dbbc', fillColor: '#00050f', fillOpacity: 1, weight: 2,
+        pane: 'measurePane', radius: 3.5, color: ink('--accent-hi'), fillColor: ink('--bg-deep'), fillOpacity: 1, weight: 2,
         interactive: false
       }).addTo(draftLayer);
     });
@@ -886,7 +901,7 @@
   }
 
   function commitMeasure(pts) {
-    var g = drawFixed(pts, '#41dbbc', false);
+    var g = drawFixed(pts, ink('--accent-hi'), false);
     measures.push(g);
     cancelDraft();
     showHint(t('ruler_hint'));
@@ -894,7 +909,7 @@
 
   function finishRoute() {
     if (!draft || draft.pts.length < 2) { cancelDraft(); return; }
-    var g = drawFixed(draft.pts, '#b8913e', true);
+    var g = drawFixed(draft.pts, ink('--gold'), true);
     routes.push(g);
     cancelDraft();
     showHint(t('route_hint'), t('route_finish'));
@@ -907,7 +922,7 @@
     }).addTo(g);
     pts.forEach(function (p) {
       L.circleMarker(px(p), {
-        pane: 'measurePane', radius: 3.5, color: color, fillColor: '#00050f', fillOpacity: 1, weight: 2
+        pane: 'measurePane', radius: 3.5, color: color, fillColor: ink('--bg-deep'), fillOpacity: 1, weight: 2
       }).addTo(g);
     });
     var total = 0;
@@ -983,9 +998,8 @@
       return;
     }
     box.innerHTML = hits.map(function (r, i) {
-      var def = S.types[r.p.type];
       return '<button class="search-hit" type="button" data-i="' + i + '"'
-           + ' style="--poi-border:' + def.borderColor + '">'
+           + ' style="' + colorVars(r.p.type) + '">'
            + '<span class="hit-dot"></span>'
            + '<span class="hit-label">' + esc(r.label) + '</span>'
            + '<span class="hit-type">' + esc(r.type) + '</span></button>';
@@ -1015,7 +1029,29 @@
     $$('#optPoiClick .seg-btn').forEach(function (b) {
       b.classList.toggle('is-on', b.dataset.click === S.opts.poiClick);
     });
+    $$('#optPalette .seg-btn').forEach(function (b) {
+      b.classList.toggle('is-on', b.dataset.palette === S.opts.palette);
+    });
     store(LS.opts, S.opts);
+  }
+
+  /* re-paint everything that carries a POI colour */
+  function repaintPalette() {
+    S.pois.forEach(function (p) {
+      var m = markers[p.id];
+      if (m) m.setIcon(makeIcon(p));
+    });
+    $$('#filterChips .filter-row').forEach(function (row) {
+      row.setAttribute('style', colorVars(row.dataset.type));
+    });
+    if (S.selected) {
+      renderPanel(S.selected);
+      var sm = markers[S.selected.id];
+      if (sm && sm._icon) {
+        var span = sm._icon.querySelector('.poi-marker');
+        if (span) span.classList.add('is-active');
+      }
+    }
   }
 
   function openModal(sel)  { $(sel).hidden = false; }
@@ -1061,6 +1097,13 @@
     });
     $$('#optPoiClick .seg-btn').forEach(function (b) {
       b.addEventListener('click', function () { S.opts.poiClick = b.dataset.click; applyOptions(); });
+    });
+    $$('#optPalette .seg-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        S.opts.palette = b.dataset.palette;
+        applyOptions();
+        repaintPalette();
+      });
     });
     $('#clearRuler').addEventListener('click', function () {
       if (confirm(t('ruler_clear_confirm'))) clearMeasures();
