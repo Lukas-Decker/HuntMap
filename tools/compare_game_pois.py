@@ -1,30 +1,39 @@
-#!/usr/bin/env python3
 """
-compare_game_pois.py - diff the community POI data against game-derived POIs.
+compare_game_pois.py - diff the community POI data against other POI sources.
 
 READ-ONLY with respect to huntmap/data/. This script never writes there; it
 only emits a report into the output directory (default: compare/).
 
+Sources
+-------
+  game  Hunt-ify, mined straight out of the game files
+        (../Hunt-ify/structured/maps/<slug>.json)
+  wiki  huntshowdown.wiki.gg interactive map, via the DataMaps API
+        (sources/wikigg/<map id>.json, produced by extract_wikigg_har.py)
+
 Why a transform is needed
 -------------------------
-The two datasets do not share a coordinate system:
+None of the three share a coordinate system:
 
   * HuntMap  - pixels on the community 4096 x 4096 map image.
-  * Hunt-ify - pixels on the game's own 2048 x 2048 overview render
-               (structured/maps/<slug>.json), whose axes are transposed
-               relative to the community image and where the playable
-               square only occupies the middle ~1024 px.
+  * Hunt-ify - pixels on the game's own 2048 x 2048 overview render, whose
+               axes are transposed relative to the community image and where
+               the playable square only occupies the middle ~1024 px.
+  * wiki.gg  - a ~1000 x 1000 canvas, same axis order as the community image
+               but its own scale and origin.
 
-So the game points are NOT a 1:1 scale of the interactive map and must be
-fitted, not assumed. The fit is solved per map in two stages:
+So neither source is a 1:1 scale of the interactive map and both must be
+fitted, not assumed. Each is solved per map in two stages:
 
   1. Seed - least-squares affine from named compound / landmark centroids
-     (matched by fuzzy name). Good to roughly 150 px; compound "centres"
-     are defined differently in the two sources.
-  2. Refine - ICP (iterative closest point) against a dense anchor layer,
-     by default cash registers, which are precise per-object placements
-     and whose counts line up almost exactly. This converges to ~10 px
-     (about 2.5 m) RMS.
+     (matched by fuzzy name). Good to roughly 150 px; the sources define a
+     compound's "centre" differently.
+  2. Refine - ICP (iterative closest point). The game source uses one dense
+     anchor layer (cash registers, precise per-object placements whose counts
+     line up almost exactly) and converges to ~2.5 m RMS. The wiki source has
+     no such layer, so it runs a typed ICP over every category that pairs 1:1
+     and converges to ~5 m - which is that source's own precision, its markers
+     being hand-placed by editors on a 1000 px canvas.
 
 The solved transform is reported so it can be sanity-checked, and can be
 pinned with --transform to skip the fit entirely.
@@ -32,6 +41,7 @@ pinned with --transform to skip the fit entirely.
 Usage
 -----
     python tools/compare_game_pois.py
+    python tools/compare_game_pois.py --source wiki --map 3
     python tools/compare_game_pois.py --map 3 --tolerance 20
     python tools/compare_game_pois.py --huntify ../Hunt-ify --overlay
 """
@@ -79,7 +89,7 @@ SLUGS = {
 #             proxy  - not the thing itself, a structural correlate found
 #                      by --suggest; useful as a hint, not as ground truth
 #             low    - large superset, only counts are meaningful
-CATEGORIES = {
+GAME_CATEGORIES = {
     "cash_register": dict(
         layers=["pt_spawnachor_LootCashRegister"],
         merge=0.0, grade="exact",
@@ -148,6 +158,80 @@ NO_GAME_LAYER = {
 }
 
 ANCHOR_DEFAULT = "pt_spawnachor_LootCashRegister"
+
+
+# --------------------------------------------------------------------------
+# huntshowdown.wiki.gg
+#
+# The wiki covers almost exactly the types the game files cannot back
+# (armories, both tower sizes, brutes, easter eggs) and misses the ones the
+# game files nail (workbenches, cash registers, melee, wild targets), so the
+# two sources are complementary rather than redundant.
+#
+# Its markers are hand-placed by editors on a 1000 px canvas, i.e. roughly
+# 4 map pixels (~1 m) of quantisation before human error, so anything inside
+# ~10 m counts as agreement.
+# --------------------------------------------------------------------------
+
+WIKI_CATEGORIES = {
+    "compound": dict(
+        layers=["Compounds"], match="name", merge=0.0, grade="exact",
+        note="matched by name; both sources place the label by eye",
+    ),
+    "extraction": dict(
+        layers=["Extraction_Points"], merge=0.0, tol=25.0, grade="exact",
+        note="the wiki tracks the visible extracts, same as the community map",
+    ),
+    "tower": dict(
+        layers=["Hunting_Tower"], merge=0.0, tol=25.0, grade="exact",
+        note="the wiki tags hunting towers directly - no proxy needed",
+    ),
+    "big_tower": dict(
+        layers=["Watch_Tower"], merge=0.0, tol=25.0, grade="exact",
+        note="the wiki tags watch towers directly and separately",
+    ),
+    "armory": dict(
+        layers=["Arsenals"], merge=0.0, tol=25.0, grade="exact",
+        note="the wiki calls them arsenals",
+    ),
+    "brute": dict(
+        layers=["Brute_Spawns"], merge=0.0, tol=30.0, grade="high",
+        note="fixed brute spawn points, which the game files do not place",
+    ),
+    "beetle": dict(
+        layers=["Beetle_Spawns"], merge=0.0, tol=30.0, grade="high",
+        note="the wiki lists fewer than the community map on every map",
+    ),
+    "spawn": dict(
+        layers=["Spawn_Points"], merge=0.0, tol=40.0, grade="high",
+        note="hunter spawn points",
+    ),
+    "easter_egg": dict(
+        layers=["Easter_Eggs"], merge=0.0, tol=25.0, grade="high",
+        note="both sides are community observation, so disagreement is normal",
+    ),
+}
+
+# wiki categories with no HuntMap type, reported for completeness
+WIKI_EXTRA_CATEGORIES = {
+    "Boss_Lairs": "individual lair positions inside compounds",
+    "Rotjaw_Spawns": "Rotjaw spawn locations",
+    "Hellborn_Spawns": "Hellborn spawn locations",
+    "Event_Spawns": "seasonal event caches and circus spawns",
+}
+
+# HuntMap types the wiki does not cover at all
+NO_WIKI_CATEGORY = {
+    "workbench": "not tracked by the wiki map",
+    "cash_register": "not tracked by the wiki map",
+    "melee_weapon": "not tracked by the wiki map",
+    "wild_target": "not tracked by the wiki map",
+}
+
+# a source category holding far fewer markers than the community map is
+# treated as incomplete rather than as evidence the map is wrong
+SPARSE_RATIO = 0.4
+SPARSE_MIN = 5
 
 
 # --------------------------------------------------------------------------
@@ -338,6 +422,16 @@ def load_huntify(huntify, slug):
         return json.load(fh)
 
 
+def load_wikigg(wiki_dir, map_id):
+    path = wiki_dir / f"{map_id}.json"
+    if not path.is_file():
+        raise SystemExit(
+            f"missing wiki.gg data: {path}\n"
+            "run tools/extract_wikigg_har.py first")
+    with path.open(encoding="utf-8") as fh:
+        return json.load(fh)
+
+
 def game_points(gdata, layer_keys):
     """Collect points from one or more Hunt-ify layers, in game px.
 
@@ -364,6 +458,41 @@ def game_points(gdata, layer_keys):
     return pts, labels, missing
 
 
+def wiki_points(wdata, cat_keys):
+    """Same contract as game_points, over wiki.gg categories."""
+    pts, labels, missing = [], [], []
+    for key in cat_keys:
+        rows = wdata.get("categories", {}).get(key)
+        if rows is None:
+            missing.append(key)
+            continue
+        for r in rows:
+            pts.append((float(r["xy"][0]), float(r["xy"][1])))
+            labels.append(r.get("label", ""))
+    return pts, labels, missing
+
+
+def collect_points(src, keys):
+    """Dispatch to the right extractor for the source kind."""
+    if src["kind"] == "game":
+        return game_points(src["raw"], keys)
+    return wiki_points(src["raw"], keys)
+
+
+def named_points(src):
+    """[(name, (x, y))] for whatever the source uses to name compounds."""
+    out = []
+    if src["kind"] == "game":
+        raw = src["raw"]
+        for c in raw.get("compounds", []) + raw.get("landmarks", []):
+            out.append((c["name"], (float(c["cx"]), float(c["cy"]))))
+    else:
+        for r in src["raw"].get("categories", {}).get("Compounds", []):
+            if r.get("label"):
+                out.append((r["label"], (float(r["xy"][0]), float(r["xy"][1]))))
+    return out
+
+
 def name_match(game_labels, map_pois):
     """Pair game entries to map POIs by fuzzy name. Returns [(gi, mi)]."""
     keys = [norm_name(p["name"]) for p in map_pois]
@@ -384,17 +513,17 @@ def name_match(game_labels, map_pois):
 # the fit
 # --------------------------------------------------------------------------
 
-def seed_transform(hm, gdata):
-    """Affine seeded from compound / landmark names common to both sources."""
+def seed_transform(hm, src_obj):
+    """Affine seeded from compound names common to the map and the source."""
     hm_by_name = {norm_name(p["name"]): p["xy"]
                   for p in hm["pois"].get("compound", []) if p["name"]}
-    game = {}
-    for c in gdata.get("compounds", []) + gdata.get("landmarks", []):
-        game[norm_name(c["name"])] = (float(c["cx"]), float(c["cy"]))
+    named = {}
+    for name, xy in named_points(src_obj):
+        named[norm_name(name)] = xy
 
     src, dst, used, unmatched = [], [], [], []
     keys = list(hm_by_name)
-    for gname, gxy in game.items():
+    for gname, gxy in named.items():
         hit = difflib.get_close_matches(gname, keys, 1, 0.70)
         if hit:
             src.append(gxy)
@@ -407,13 +536,72 @@ def seed_transform(hm, gdata):
     return fit_affine(src, dst), used, unmatched
 
 
+def typed_icp(T, hm, src_obj, catmap, rounds=14, gate_px=800.0):
+    """ICP for sources with no single dense anchor layer.
+
+    Nearest-neighbour is resolved *within* each category that pairs 1:1, so a
+    tower can only ever snap to a tower. The union of those pairs drives the
+    refit, which gives enough constraints even when every category is small.
+    """
+    usable = [(t, s) for t, s in catmap.items()
+              if s["grade"] in ("exact", "high") and hm["pois"].get(t)]
+    if not usable:
+        return T, None
+
+    gate = gate_px
+    pairs_n = 0
+    for _ in range(rounds):
+        keep_s, keep_d = [], []
+        for tkey, spec in usable:
+            pts, _lab, _miss = collect_points(src_obj, spec["layers"])
+            dst = [p["xy"] for p in hm["pois"][tkey]]
+            if not pts or not dst:
+                continue
+            for i, p in enumerate(apply_affine(T, pts)):
+                j, d = nearest(p, dst)
+                if d <= gate:
+                    keep_s.append(pts[i])
+                    keep_d.append(dst[j])
+        if len(keep_s) < 6:
+            break
+        pairs_n = len(keep_s)
+        try:
+            new_T = fit_affine(keep_s, keep_d)
+        except ValueError:
+            break
+        done = max(abs(a - b) for a, b in zip(new_T, T)) < 1e-9
+        T = new_T
+        if done:
+            break
+        gate = max(60.0, gate * 0.72)
+
+    res = []
+    for tkey, spec in usable:
+        pts, _lab, _miss = collect_points(src_obj, spec["layers"])
+        dst = [p["xy"] for p in hm["pois"][tkey]]
+        if not pts or not dst:
+            continue
+        res += [nearest(p, dst)[1] for p in apply_affine(T, pts)]
+    inl = [d for d in res if d <= 60.0]
+    quality = dict(
+        anchor="typed ICP over " + ", ".join(t for t, _ in usable),
+        anchor_points=pairs_n,
+        map_points=sum(len(hm["pois"][t]) for t, _ in usable),
+        inliers_40px=len(inl),
+        rms_px=round(math.sqrt(sum(d * d for d in inl) / len(inl)), 2) if inl else None,
+        rms_m=round(math.sqrt(sum(d * d for d in inl) / len(inl)) * M_PER_PX, 2) if inl else None,
+        median_px=round(sorted(res)[len(res) // 2], 2) if res else None,
+    )
+    return T, quality
+
+
 def refine_icp(T, gdata, hm, anchor_key, rounds=12, gate_px=250.0):
     """Tighten the transform with ICP against a dense, reliable layer."""
     layer = gdata["layers"].get(anchor_key)
     if layer is None:
         return T, None
     src = [(float(i[0]), float(i[1])) for i in layer["items"]]
-    dst_type = next((k for k, v in CATEGORIES.items()
+    dst_type = next((k for k, v in GAME_CATEGORIES.items()
                      if anchor_key in v["layers"]), None)
     dst = [p["xy"] for p in hm["pois"].get(dst_type, [])] if dst_type else []
     if len(src) < 8 or len(dst) < 8:
@@ -459,26 +647,26 @@ def refine_icp(T, gdata, hm, anchor_key, rounds=12, gate_px=250.0):
 # comparison
 # --------------------------------------------------------------------------
 
-def compare_map(root, huntify, slug, map_id, tol_m, anchor, want_overlay,
-                pinned=None):
-    hm = load_huntmap(root, map_id)
-    gdata = load_huntify(huntify, slug)
-
+def compare_source(hm, src_obj, catmap, map_id, tol_m, anchor,
+                   want_overlay, pinned=None):
+    """Align one source to the community map and diff every mapped category."""
     if pinned is not None:
         T, matched_names, unmatched_names = tuple(pinned), [], []
         quality = dict(anchor="pinned via --transform", anchor_points=None,
                        map_points=None, inliers_40px=None, rms_px=None,
                        rms_m=None, median_px=None)
     else:
-        T, matched_names, unmatched_names = seed_transform(hm, gdata)
-        T, quality = refine_icp(T, gdata, hm, anchor)
+        T, matched_names, unmatched_names = seed_transform(hm, src_obj)
+        if src_obj["kind"] == "game":
+            # one dense, per-object layer beats a typed pass here
+            T, quality = refine_icp(T, src_obj["raw"], hm, anchor)
+        else:
+            T, quality = typed_icp(T, hm, src_obj, catmap)
 
-    result = dict(
-        map_id=map_id,
-        map_name=hm["name"],
-        game_slug=slug,
-        game_display=gdata.get("displayName"),
-        tolerance_m=tol_m,
+    out = dict(
+        source=src_obj["key"],
+        source_label=src_obj["label"],
+        origin=src_obj.get("origin", ""),
         transform=dict(
             matrix=[round(v, 6) for v in T],
             formula="X = ax*x + bx*y + cx ; Y = ay*x + by*y + cy",
@@ -488,17 +676,19 @@ def compare_map(root, huntify, slug, map_id, tol_m, anchor, want_overlay,
                   compounds_unmatched=unmatched_names),
         fit_quality=quality,
         categories={},
-        unbacked_types={k: v for k, v in NO_GAME_LAYER.items()},
+        unbacked_types=dict(src_obj.get("unbacked", {})),
+        extra_categories={},
     )
 
-    overlay = dict(map_id=map_id, transform=[round(v, 6) for v in T],
+    overlay = dict(map_id=map_id, source=src_obj["key"],
+                   transform=[round(v, 6) for v in T],
                    categories={}) if want_overlay else None
 
-    for tkey, spec in CATEGORIES.items():
+    for tkey, spec in catmap.items():
         map_pois = hm["pois"].get(tkey, [])
         map_pts = [p["xy"] for p in map_pois]
 
-        raw_pts, labels, missing_layers = game_points(gdata, spec["layers"])
+        raw_pts, labels, missing_layers = collect_points(src_obj, spec["layers"])
         moved = apply_affine(T, raw_pts)
         merged, groups = merge_close(moved, spec["merge"] / M_PER_PX)
         if groups:                                  # keep labels aligned
@@ -512,40 +702,46 @@ def compare_map(root, huntify, slug, map_id, tol_m, anchor, want_overlay,
             pairs = [(gi, mi, dist(merged[gi], map_pts[mi])) for gi, mi in np_pairs]
             seen_g = {gi for gi, _, _ in pairs}
             seen_m = {mi for _, mi, _ in pairs}
-            game_only = [i for i in range(len(merged)) if i not in seen_g]
+            source_only = [i for i in range(len(merged)) if i not in seen_g]
             map_only = [j for j in range(len(map_pts)) if j not in seen_m]
         else:
-            pairs, game_only, map_only = greedy_match(merged, map_pts, cat_tol_px)
+            pairs, source_only, map_only = greedy_match(merged, map_pts, cat_tol_px)
 
         offsets_m = [d * M_PER_PX for _, _, d in pairs]
+
+        # a source category far thinner than the map is incomplete, not proof
+        # that the map invented POIs
+        sparse = (len(map_pts) >= SPARSE_MIN
+                  and len(merged) < SPARSE_RATIO * len(map_pts))
 
         entry = dict(
             grade=spec["grade"],
             matched_by=spec.get("match", "distance"),
             tolerance_m=None if spec.get("match") == "name" else cat_tol_m,
             note=spec["note"],
-            game_layers=spec["layers"],
+            source_layers=spec["layers"],
             missing_layers=missing_layers,
-            game_raw=len(raw_pts),
-            game_merged=len(merged),
+            sparse=sparse,
+            source_raw=len(raw_pts),
+            source_merged=len(merged),
             map_count=len(map_pts),
             matched=len(pairs),
-            game_only=len(game_only),
+            source_only=len(source_only),
             map_only=len(map_only),
             offset_m=stats(offsets_m),
-            game_only_points=[[round(merged[i][0], 1), round(merged[i][1], 1)]
-                              for i in game_only],
+            source_only_points=[[round(merged[i][0], 1), round(merged[i][1], 1)]
+                                for i in source_only],
             map_only_pois=[dict(id=map_pois[j]["id"],
                                 xy=[int(map_pts[j][0]), int(map_pts[j][1])],
                                 name=map_pois[j]["name"],
                                 desc=map_pois[j]["desc"][:70])
                            for j in map_only],
         )
-        result["categories"][tkey] = entry
+        out["categories"][tkey] = entry
 
         if overlay is not None:
             overlay["categories"][tkey] = dict(
-                game_only=entry["game_only_points"],
+                source_only=entry["source_only_points"],
                 map_only=[p["id"] for p in entry["map_only_pois"]],
                 matched=[[map_pois[j]["id"],
                           [round(merged[i][0], 1), round(merged[i][1], 1)],
@@ -553,7 +749,56 @@ def compare_map(root, huntify, slug, map_id, tol_m, anchor, want_overlay,
                          for i, j, d in pairs],
             )
 
-    return result, overlay
+    # categories the source carries that the community map has no type for
+    if src_obj["kind"] == "wiki":
+        used = {k for s in catmap.values() for k in s["layers"]}
+        for cat, rows in src_obj["raw"].get("categories", {}).items():
+            if cat not in used:
+                out["extra_categories"][cat] = dict(
+                    count=len(rows),
+                    note=WIKI_EXTRA_CATEGORIES.get(cat, ""))
+
+    return out, overlay
+
+
+def compare_map(root, huntify, wiki_dir, slug, map_id, tol_m, anchor,
+                want_overlay, source_keys, pinned=None):
+    """Run every requested source against one map."""
+    hm = load_huntmap(root, map_id)
+
+    result = dict(
+        map_id=map_id,
+        map_name=hm["name"],
+        game_slug=slug,
+        tolerance_m=tol_m,
+        sources={},
+    )
+    overlays = {}
+
+    for key in source_keys:
+        if key == "game":
+            raw = load_huntify(huntify, slug)
+            src_obj = dict(kind="game", key="game",
+                           label="Hunt-ify (game files)",
+                           origin=f"structured/maps/{slug}.json",
+                           raw=raw, unbacked=NO_GAME_LAYER)
+            catmap = GAME_CATEGORIES
+            result["game_display"] = raw.get("displayName")
+        else:
+            raw = load_wikigg(wiki_dir, map_id)
+            src_obj = dict(kind="wiki", key="wiki",
+                           label="huntshowdown.wiki.gg",
+                           origin=f"{raw.get('title', '')} rev {raw.get('revision')}",
+                           raw=raw, unbacked=NO_WIKI_CATEGORY)
+            catmap = WIKI_CATEGORIES
+
+        res, ov = compare_source(hm, src_obj, catmap, map_id, tol_m, anchor,
+                                 want_overlay, pinned)
+        result["sources"][key] = res
+        if ov is not None:
+            overlays[key] = ov
+
+    return result, overlays
 
 
 # --------------------------------------------------------------------------
@@ -570,7 +815,9 @@ def suggest_layers(root, huntify, slug, map_id, radius_m, top):
     """
     hm = load_huntmap(root, map_id)
     gdata = load_huntify(huntify, slug)
-    T, _, _ = seed_transform(hm, gdata)
+    src_obj = dict(kind="game", key="game", label="Hunt-ify (game files)",
+                   raw=gdata, unbacked=NO_GAME_LAYER)
+    T, _, _ = seed_transform(hm, src_obj)
     T, quality = refine_icp(T, gdata, hm, ANCHOR_DEFAULT)
     rad_px = radius_m / M_PER_PX
 
@@ -618,7 +865,7 @@ def suggest_markdown(reports, radius_m):
          "real correspondence.\n",
          f"Hit radius: **{radius_m:g} m**.\n",
          "> These are statistical hints, not authoritative mappings. Only the "
-         "pairings promoted into `CATEGORIES` are used by the diff.\n"]
+         "pairings promoted into the category tables are used by the diff.\n"]
     for rep in reports:
         L.append(f'## {rep["map_name"]}\n')
         for tkey, t in rep["types"].items():
@@ -640,82 +887,181 @@ def suggest_markdown(reports, radius_m):
 # reporting
 # --------------------------------------------------------------------------
 
-def markdown(results, tol_m):
+GRADE_NOTE = {
+    "exact": "one source entity per map POI; counts should line up",
+    "high": "same objects, minor bookkeeping differences expected",
+    "medium": "same class of object, partial overlap expected",
+    "partial": "source set is a subset or superset by design",
+    "proxy": "a structural correlate, not the object itself",
+    "low": "large superset or systematic offset; counts only",
+}
+
+
+def markdown(results, tol_m, source_keys):
     L = []
     add = L.append
-    add("# Community POI data vs game-derived POIs\n")
+    add("# Community POI data vs other POI sources\n")
     add("Generated by `tools/compare_game_pois.py`. The community data in "
         "`huntmap/data/` is **read-only** here - nothing in this report has "
         "been written back.\n")
-    add(f"Match tolerance: **{tol_m:g} m**. "
-        f"1 map pixel = {M_PER_PX:.4f} m.\n")
+    add(f"Default match tolerance: **{tol_m:g} m** (some categories set their "
+        f"own). 1 map pixel = {M_PER_PX:.4f} m.\n")
 
-    add("## Alignment\n")
-    add("| Map | scale x | scale y | rotation | mirrored | anchor inliers | "
-        "RMS |")
-    add("|---|--:|--:|--:|:--:|--:|--:|")
-    for r in results:
-        q = r["fit_quality"] or {}
-        t = r["transform"]
-        rms = f'{q.get("rms_px")} px / {q.get("rms_m")} m' if q.get("rms_px") else "n/a"
-        inl = f'{q.get("inliers_40px")} / {q.get("anchor_points")}' if q else "n/a"
-        add(f'| {r["map_name"]} | {t["scale_x"]} | {t["scale_y"]} | '
-            f'{t["rotation_deg"]}deg | {"yes" if t["mirrored"] else "no"} | '
-            f'{inl} | {rms} |')
+    # ---- sources -------------------------------------------------------
+    add("## Sources\n")
+    add("| key | source | what it is good for |")
+    add("|---|---|---|")
+    if "game" in source_keys:
+        add("| `game` | Hunt-ify, mined from the game files | exact placements: "
+            "workbenches, cash registers, melee, spawns |")
+    if "wiki" in source_keys:
+        add("| `wiki` | huntshowdown.wiki.gg interactive map | the types the "
+            "game files cannot tag: armories, towers, brutes, easter eggs |")
     add("")
 
+    # ---- alignment -----------------------------------------------------
+    add("## Alignment\n")
+    add("Each source is fitted to the community map, not assumed to share its "
+        "grid. Residual RMS is the *disagreement* between the two, so it also "
+        "measures how precise the source is.\n")
+    add("| Map | source | scale x | scale y | rotation | mirrored | inliers | RMS |")
+    add("|---|---|--:|--:|--:|:--:|--:|--:|")
     for r in results:
-        add(f'## {r["map_name"]}  <sub>(game level `{r["game_slug"]}`)</sub>\n')
-        q = r["fit_quality"]
-        if q and q.get("rms_m") is not None and q["rms_m"] > 8:
-            add(f'> **Warning** - alignment is loose ({q["rms_m"]} m RMS). '
-                "Treat the per-category numbers below as indicative only.\n")
-        if r["seed"]["compounds_unmatched"]:
-            add("> Compounds with no name match: "
-                + ", ".join(r["seed"]["compounds_unmatched"]) + "\n")
-
-        add("| Type | grade | game | map | matched | game only | map only | "
-            "median off |")
-        add("|---|:--:|--:|--:|--:|--:|--:|--:|")
-        for tkey, c in r["categories"].items():
-            g = (f'{c["game_merged"]}'
-                 + (f' ({c["game_raw"]} raw)' if c["game_merged"] != c["game_raw"] else ""))
-            off = f'{c["offset_m"]["median"]} m' if c["offset_m"] else "-"
-            add(f'| {tkey} | {c["grade"]} | {g} | {c["map_count"]} | '
-                f'{c["matched"]} | {c["game_only"]} | {c["map_only"]} | {off} |')
-        add("")
-
-        for tkey, c in r["categories"].items():
-            if c["grade"] in ("low",):
+        for key in source_keys:
+            s = r["sources"].get(key)
+            if not s:
                 continue
-            if not c["game_only"] and not c["map_only"]:
+            q = s["fit_quality"] or {}
+            t = s["transform"]
+            rms = (f'{q.get("rms_px")} px / {q.get("rms_m")} m'
+                   if q.get("rms_px") else "n/a")
+            inl = (f'{q.get("inliers_40px")} / {q.get("anchor_points")}'
+                   if q.get("anchor_points") else "n/a")
+            add(f'| {r["map_name"]} | `{key}` | {t["scale_x"]} | {t["scale_y"]} | '
+                f'{t["rotation_deg"]}deg | {"yes" if t["mirrored"] else "no"} | '
+                f'{inl} | {rms} |')
+    add("")
+
+    # ---- per map -------------------------------------------------------
+    for r in results:
+        add(f'## {r["map_name"]}\n')
+
+        # combined view: every type, every source, side by side
+        types = []
+        for key in source_keys:
+            s = r["sources"].get(key)
+            if s:
+                types += [t for t in s["categories"] if t not in types]
+        if types:
+            add("### Coverage by type\n")
+            head = "| Type | map |"
+            sep = "|---|--:|"
+            for key in source_keys:
+                head += f" {key} | matched | diff |"
+                sep += "--:|--:|--:|"
+            add(head)
+            add(sep)
+            for tkey in types:
+                map_n = None
+                cells = ""
+                for key in source_keys:
+                    s = r["sources"].get(key)
+                    c = s["categories"].get(tkey) if s else None
+                    if not c:
+                        cells += " - | - | - |"
+                        continue
+                    map_n = c["map_count"]
+                    flag = " !" if c["sparse"] else ""
+                    diff = c["source_only"] + c["map_only"]
+                    cells += (f' {c["source_merged"]}{flag} | {c["matched"]} |'
+                              f' {diff} |')
+                add(f'| {tkey} | {map_n if map_n is not None else "-"} |' + cells)
+            add("")
+            add("`!` marks a source category holding under "
+                f"{int(SPARSE_RATIO * 100)}% of what the map has - read that as "
+                "the source being incomplete, not the map being wrong.\n")
+
+        for key in source_keys:
+            s = r["sources"].get(key)
+            if not s:
                 continue
-            add(f'### {tkey}\n')
-            add(f'_{c["note"]}_\n')
-            if c["game_only"]:
-                add(f'**{c["game_only"]} in the game data with no POI on the map** '
-                    "(map-image coordinates):\n")
-                pts = ", ".join(f'({x:.0f}, {y:.0f})'
-                                for x, y in c["game_only_points"][:40])
-                add(pts + ("  ..." if c["game_only"] > 40 else "") + "\n")
-            if c["map_only"]:
-                add(f'**{c["map_only"]} on the map with nothing in the game data:**\n')
-                add("| id | x / y | note |")
-                add("|---|---|---|")
-                for p in c["map_only_pois"][:40]:
-                    label = p["name"] or p["desc"] or ""
-                    add(f'| `{p["id"]}` | {p["xy"][0]} / {p["xy"][1]} | {label} |')
-                if c["map_only"] > 40:
-                    add(f'| ... | | {c["map_only"] - 40} more |')
+            add(f'### Source `{key}` - {s["source_label"]}\n')
+            if s.get("origin"):
+                add(f'<sub>{s["origin"]}</sub>\n')
+            q = s["fit_quality"]
+            if q and q.get("rms_m") is not None and q["rms_m"] > 8:
+                add(f'> Alignment residual is {q["rms_m"]} m. For a hand-placed '
+                    "source that is its own precision, not a fit failure - but "
+                    "treat sub-10 m offsets below as agreement.\n")
+            if s["seed"]["compounds_unmatched"]:
+                add("> Compounds with no name match: "
+                    + ", ".join(s["seed"]["compounds_unmatched"]) + "\n")
+
+            add("| Type | grade | source | map | matched | source only | "
+                "map only | median off |")
+            add("|---|:--:|--:|--:|--:|--:|--:|--:|")
+            for tkey, c in s["categories"].items():
+                g = (f'{c["source_merged"]}'
+                     + (f' ({c["source_raw"]} raw)'
+                        if c["source_merged"] != c["source_raw"] else ""))
+                off = f'{c["offset_m"]["median"]} m' if c["offset_m"] else "-"
+                add(f'| {tkey} | {c["grade"]} | {g} | {c["map_count"]} | '
+                    f'{c["matched"]} | {c["source_only"]} | {c["map_only"]} | '
+                    f'{off} |')
+            add("")
+
+            sparse = [t for t, c in s["categories"].items() if c["sparse"]]
+            if sparse:
+                add(f'> **Incomplete in this source:** {", ".join(sparse)}. '
+                    "Their differences are listed but should not be read as "
+                    "gaps in the community map.\n")
+
+            for tkey, c in s["categories"].items():
+                if c["grade"] == "low" or c["sparse"]:
+                    continue
+                if not c["source_only"] and not c["map_only"]:
+                    continue
+                add(f'#### {tkey} <sub>({key})</sub>\n')
+                add(f'_{c["note"]}_\n')
+                if c["source_only"]:
+                    add(f'**{c["source_only"]} in the source with no POI on the '
+                        "map** (map-image coordinates):\n")
+                    pts = ", ".join(f'({x:.0f}, {y:.0f})'
+                                    for x, y in c["source_only_points"][:40])
+                    add(pts + ("  ..." if c["source_only"] > 40 else "") + "\n")
+                if c["map_only"]:
+                    add(f'**{c["map_only"]} on the map with nothing in the '
+                        "source:**\n")
+                    add("| id | x / y | note |")
+                    add("|---|---|---|")
+                    for p in c["map_only_pois"][:40]:
+                        label = p["name"] or p["desc"] or ""
+                        add(f'| `{p["id"]}` | {p["xy"][0]} / {p["xy"][1]} | {label} |')
+                    if c["map_only"] > 40:
+                        add(f'| ... | | {c["map_only"] - 40} more |')
+                    add("")
+
+            if s["extra_categories"]:
+                add(f'#### Source categories with no map type <sub>({key})</sub>\n')
+                add("| category | count | what it is |")
+                add("|---|--:|---|")
+                for cat, info in sorted(s["extra_categories"].items()):
+                    add(f'| `{cat}` | {info["count"]} | {info["note"]} |')
                 add("")
 
-        add("### Types with no game counterpart\n")
-        for k, why in r["unbacked_types"].items():
-            add(f'- **{k}** - {why}')
-        add("")
+            if s["unbacked_types"]:
+                add(f'#### Map types this source cannot back <sub>({key})</sub>\n')
+                for k, why in s["unbacked_types"].items():
+                    add(f'- **{k}** - {why}')
+                add("")
+
+    add("---\n")
+    add("### How to read the grades\n")
+    for g, why in GRADE_NOTE.items():
+        add(f'- **{g}** - {why}')
+    add("")
 
     return "\n".join(L)
-
 
 # --------------------------------------------------------------------------
 # main
@@ -729,6 +1075,11 @@ def main(argv=None):
                     "(read-only, solves the coordinate transform).")
     ap.add_argument("--huntify", default=str(root.parent / "Hunt-ify"),
                     help="path to the Hunt-ify repo (default: ../Hunt-ify)")
+    ap.add_argument("--wikigg", default=str(root / "sources" / "wikigg"),
+                    help="directory of extracted wiki.gg data "
+                         "(default: sources/wikigg)")
+    ap.add_argument("--source", default="all", choices=["all", "game", "wiki"],
+                    help="which source(s) to diff against (default: all)")
     ap.add_argument("--map", default="all",
                     help="map id 1-4, or 'all' (default: all)")
     ap.add_argument("--out", default=str(root / "compare"),
@@ -752,9 +1103,21 @@ def main(argv=None):
     ap.add_argument("--quiet", action="store_true", help="no stdout summary")
     args = ap.parse_args(argv)
 
+    source_keys = ["game", "wiki"] if args.source == "all" else [args.source]
+
     huntify = Path(args.huntify).resolve()
-    if not (huntify / "structured" / "maps").is_dir():
+    if "game" in source_keys and not (huntify / "structured" / "maps").is_dir():
         raise SystemExit(f"not a Hunt-ify checkout: {huntify}")
+
+    wiki_dir = Path(args.wikigg).resolve()
+    if "wiki" in source_keys and not wiki_dir.is_dir():
+        if args.source == "all":
+            print(f"note: no wiki.gg data at {wiki_dir}, comparing game only "
+                  "(run tools/extract_wikigg_har.py to add it)", file=sys.stderr)
+            source_keys = ["game"]
+        else:
+            raise SystemExit(f"no wiki.gg data at {wiki_dir}\n"
+                             "run tools/extract_wikigg_har.py first")
 
     out = Path(args.out).resolve()
     data_dir = (root / "huntmap" / "data").resolve()
@@ -794,6 +1157,9 @@ def main(argv=None):
 
     pinned = None
     if args.transform:
+        if len(source_keys) != 1:
+            raise SystemExit("--transform pins one source's fit, so pass "
+                             "--source game or --source wiki with it")
         parts = [p for p in re.split(r"[,\s]+", args.transform.strip()) if p]
         if len(parts) != 6:
             raise SystemExit("--transform needs exactly 6 numbers: ax,bx,cx,ay,by,cy")
@@ -801,28 +1167,35 @@ def main(argv=None):
 
     results = []
     for slug, map_id in sorted(wanted, key=lambda kv: kv[1]):
-        res, overlay = compare_map(root, huntify, slug, map_id,
-                                   args.tolerance, args.anchor, args.overlay,
-                                   pinned)
+        res, overlays = compare_map(root, huntify, wiki_dir, slug, map_id,
+                                    args.tolerance, args.anchor, args.overlay,
+                                    source_keys, pinned)
         results.append(res)
         (out / f"report-{map_id}.json").write_text(
             json.dumps(res, indent=1, ensure_ascii=False), encoding="utf-8")
-        if overlay is not None:
-            (out / f"overlay-{map_id}.json").write_text(
-                json.dumps(overlay, ensure_ascii=False), encoding="utf-8")
+        for key, ov in overlays.items():
+            (out / f"overlay-{key}-{map_id}.json").write_text(
+                json.dumps(ov, ensure_ascii=False), encoding="utf-8")
 
-    (out / "REPORT.md").write_text(markdown(results, args.tolerance),
-                                   encoding="utf-8")
+    (out / "REPORT.md").write_text(
+        markdown(results, args.tolerance, source_keys), encoding="utf-8")
 
     if not args.quiet:
         for r in results:
-            q = r["fit_quality"] or {}
-            print(f'{r["map_name"]:<18} fit {q.get("rms_m", "?")} m RMS '
-                  f'({q.get("inliers_40px")}/{q.get("anchor_points")} anchors)')
-            for tkey, c in r["categories"].items():
-                print(f'   {tkey:<15} game {c["game_merged"]:>4}  '
-                      f'map {c["map_count"]:>4}  matched {c["matched"]:>4}  '
-                      f'game-only {c["game_only"]:>4}  map-only {c["map_only"]:>4}')
+            print(f'{r["map_name"]}')
+            for key in source_keys:
+                s = r["sources"].get(key)
+                if not s:
+                    continue
+                q = s["fit_quality"] or {}
+                print(f'  [{key}] fit {q.get("rms_m", "?")} m RMS '
+                      f'({q.get("inliers_40px")}/{q.get("anchor_points")} pairs)')
+                for tkey, c in s["categories"].items():
+                    flag = " SPARSE" if c["sparse"] else ""
+                    print(f'     {tkey:<15} src {c["source_merged"]:>4}  '
+                          f'map {c["map_count"]:>4}  matched {c["matched"]:>4}  '
+                          f'src-only {c["source_only"]:>4}  '
+                          f'map-only {c["map_only"]:>4}{flag}')
         print(f'\nreport -> {out}')
     return 0
 

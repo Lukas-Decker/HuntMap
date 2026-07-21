@@ -4,7 +4,7 @@ Produced by `--suggest`. For each HuntMap POI type this ranks the game layers by
 
 Hit radius: **12 m**.
 
-> These are statistical hints, not authoritative mappings. Only the pairings promoted into `CATEGORIES` are used by the diff.
+> These are statistical hints, not authoritative mappings. Only the pairings promoted into the category tables are used by the diff.
 
 ## Stillwater Bayou
 

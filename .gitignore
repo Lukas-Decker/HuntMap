@@ -8,5 +8,10 @@ Thumbs.db
 .vscode/
 .idea/
 
-# generated reports - regenerate with tools/compare_game_pois.py
+# generated - regenerate with the tools in tools/
 compare/*.json
+sources/wikigg/*.json    # from the wiki.gg HARs, via extract_wikigg_har.py
+
+# python
+__pycache__/
+*.pyc

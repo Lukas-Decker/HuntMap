@@ -3,7 +3,7 @@
 A self-contained recreation of the interactive maps at `https://hunt.kamille.ovh/maps/`,
 rebuilt from the captured HAR archive plus a live inspection of the page's DOM and CSS.
 
-Version: **1.1.1**
+Version: **1.2.0**
 
 ---
 
@@ -134,42 +134,68 @@ Map images and boundary overlays are local, so the map itself renders offline.
 
 ---
 
-## 4. Comparing against the game files
+## 4. Comparing against other POI sources
 
-`tools/compare_game_pois.py` diffs the community POI data against POIs mined
-straight out of the game by the sibling **Hunt-ify** repo
-(`../Hunt-ify/structured/maps/*.json`).
+`tools/compare_game_pois.py` diffs the community POI data against two
+independent sources:
+
+| key | source | good for |
+|---|---|---|
+| `game` | **Hunt-ify**, mined from the game files (`../Hunt-ify/structured/maps/*.json`) | exact placements: workbenches, cash registers, melee, spawns |
+| `wiki` | **huntshowdown.wiki.gg** interactive map, via its DataMaps API | the types the game files cannot tag: armories, towers, brutes, easter eggs |
+
+They are complementary, not redundant: each covers almost exactly what the
+other misses.
 
 ```powershell
-python tools/compare_game_pois.py                 # all 4 maps -> compare/
+python tools/extract_wikigg_har.py                # HARs -> sources/wikigg/
+python tools/compare_game_pois.py                 # both sources, 4 maps
+python tools/compare_game_pois.py --source wiki --map 3
 python tools/compare_game_pois.py --map 3 --tolerance 20
-python tools/compare_game_pois.py --suggest       # layer discovery
+python tools/compare_game_pois.py --suggest       # layer discovery (game only)
 ```
+
+The wiki data arrives as HAR captures of
+`api.php?action=queryDataMap&pageid=…`; `extract_wikigg_har.py` normalises
+each into `sources/wikigg/<map id>.json` (strips the HTML out of labels and
+descriptions, records the page revision).
 
 **It never writes to `huntmap/data/`.** There is a hard guard that aborts if the
 output directory would land inside it; the community data stays the source of
 truth and the report is the only output.
 
-### The two datasets are not on the same grid
+### None of them are on the same grid
 
-Hunt-ify coordinates are pixels on the game's own **2048 x 2048** overview
-render, with the axes **transposed** relative to the community image and the
-playable square filling only the middle ~1024 px. So they are not a 1:1 scale
-of the interactive map and the script solves the transform rather than assuming
-one:
+- **Hunt-ify** coordinates are pixels on the game's own **2048 x 2048** overview
+  render, with the axes **transposed** relative to the community image and the
+  playable square filling only the middle ~1024 px.
+- **wiki.gg** markers sit on a **~1000 x 1000** canvas, same axis order as the
+  community image but its own scale and origin.
 
-1. **Seed** - least-squares affine from compound and landmark centroids matched
-   by fuzzy name. Good to roughly 150 px; the two sources define a compound's
-   "centre" differently.
-2. **Refine** - ICP against a dense anchor layer (cash registers by default),
-   whose counts line up almost exactly and whose placements are per-object.
+So neither is a 1:1 scale of the interactive map, and the script solves each
+transform rather than assuming one:
 
-It converges to the same answer on all four maps - scale ~4.0, 90 degree
-rotation, mirrored, i.e. `X = 4y - 2048`, `Y = 4x - 2048` - at **2.3 to 2.7 m
-RMS** over 87 / 81 / 173 / 208 anchor points. Pin it with `--transform` to skip
-the fit.
+1. **Seed** - least-squares affine from compound centroids matched by fuzzy
+   name. Good to roughly 150 px; the sources define a compound's "centre"
+   differently.
+2. **Refine** - ICP. `game` uses one dense anchor layer (cash registers,
+   per-object placements whose counts line up almost exactly). `wiki` has no
+   such layer, so it runs a **typed** ICP: nearest-neighbour is resolved inside
+   each 1:1 category, so a tower can only ever snap to a tower.
+
+| source | solved transform | RMS |
+|---|---|---|
+| `game` | scale ~4.0, 90 deg, mirrored: `X = 4y - 2048`, `Y = 4x - 2048` | **2.3 - 2.7 m** |
+| `wiki` | scale ~4.08, no rotation, no mirror: `X ~ 4.1x`, `Y ~ 4.1y` | **6.5 - 8.1 m** |
+
+The wiki's larger residual is that source's own precision, not a fit failure:
+its markers are hand-placed by editors on a 1000 px canvas, so ~1 m of
+quantisation before human error. Read sub-10 m offsets there as agreement.
+Pin either with `--transform` (requires a single `--source`).
 
 ### What lines up
+
+**game** - the placement-accurate source:
 
 | Type | grade | result across the 4 maps |
 |---|---|---|
@@ -182,14 +208,43 @@ the fit.
 | `extraction`, `wild_target` | low | game set is offset or a large superset; counts only |
 | `armory`, `brute`, `easter_egg` | - | no game layer at all |
 
+**wiki** - covers the gaps, and corroborates them cleanly:
+
+| Type | grade | result across the 4 maps |
+|---|---|---|
+| `compound` | exact | 16/16 on every map |
+| `tower` | exact | 14/14, 17/19, 12/13, 3/3 - a real tag, no proxy needed |
+| `big_tower` | exact | 3/3, 2/2, 4/4, 2/2 |
+| `armory` | exact | 1/1, 1/1, 1/2, 4/8 |
+| `brute` | high | 5/5, 4/5, 5/6, 5/6 |
+| `extraction` | exact | 13/16, 19/20, 13/17, 18/20 |
+| `easter_egg` | high | 15/22, 19/25, 21/27 (Lawson is sparse, see below) |
+| `beetle` | high | the wiki lists 4-5 where the map has 7, on every map |
+| `workbench`, `cash_register`, `melee_weapon`, `wild_target` | - | not tracked by the wiki |
+
+Categories the wiki has and the community map does not: `Boss_Lairs`,
+`Rotjaw_Spawns`, `Hellborn_Spawns`, `Event_Spawns`. They are counted in the
+report but not diffed.
+
+### Sparse-source guard
+
+A source category holding under 40% of what the community map has is flagged
+`!` / `SPARSE` and its differences are excluded from the "missing from the map"
+narrative - the source is incomplete, not the map wrong. This fires on the
+wiki's Lawson Delta spawn points (2 vs 26) and easter eggs (1 vs 11), and on
+Mammon's Gulch spawn points (4 vs 37). Those wiki pages are genuinely thin
+there; the captures are complete (no pagination, JSON intact).
+
 `--suggest` ranks every game layer against every POI type by **lift** (coverage
 divided by what a random layer of the same size would score), which is how the
 tower / beetle proxies were found. Its output is a hint, not ground truth, and
-only pairings promoted into `CATEGORIES` are used by the diff.
+only pairings promoted into the category tables are used by the diff.
 
 Outputs land in `compare/`: `REPORT.md`, `SUGGEST.md`, per-map `report-N.json`,
-and with `--overlay` a `overlay-N.json` carrying every matched pair, game-only
-point and map-only POI id.
+and with `--overlay` an `overlay-<source>-N.json` per source, carrying every
+matched pair, source-only point and map-only POI id. `REPORT.md` opens with a
+per-map **coverage by type** table putting the map, `game` and `wiki` counts
+side by side.
 
 ### Reading the reports in a browser
 
@@ -214,7 +269,8 @@ small Markdown renderer is built in).
 
 ```
 HuntMap/
-├─ hunt.kamille.ovh_Archive [...].har   source capture
+├─ hunt.kamille.ovh_Archive [...].har   source capture (the community map)
+├─ *-huntshowdown.wiki.gg_*.har        source captures (the wiki map, 4)
 ├─ har_extract/                         raw response bodies pulled out of the HAR
 ├─ huntmap/
 │  ├─ index.html
@@ -225,8 +281,10 @@ HuntMap/
 │  ├─ data/                             from the HAR, unmodified except as noted
 │  │  ├─ maps.json  poi-types.json  data-1..4.json  translations.json
 │  └─ images/                           1-4.webp (map art) + 1-4.svg (boundaries)
+├─ sources/wikigg/                      wiki.gg markers extracted from the HARs
 ├─ tools/
-│  ├─ compare_game_pois.py              diff vs Hunt-ify game data (read-only)
+│  ├─ extract_wikigg_har.py             wiki.gg HARs -> sources/wikigg/
+│  ├─ compare_game_pois.py              diff vs game + wiki data (read-only)
 │  └─ serve_compare.py                  browse the reports at 127.0.0.1:8778
 ├─ compare/                             generated reports (regenerate any time)
 └─ .claude/launch.json
@@ -246,3 +304,5 @@ This is a local study rebuild of the front end, not a redistribution.
 
 The colour scheme comes from the sibling HuntWiki project, and the game-derived
 POI data compared in section 4 comes from Hunt-ify, both local sibling repos.
+The wiki POI data in section 4 belongs to huntshowdown.wiki.gg and its editors;
+it is used here only to cross-check the community map, never merged into it.

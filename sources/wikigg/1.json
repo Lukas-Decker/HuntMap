@@ -1,0 +1,1435 @@
+{
+ "source": "huntshowdown.wiki.gg",
+ "map_id": 1,
+ "title": "Map:Stillwater Bayou",
+ "revision": 14175,
+ "coord_space": 1000,
+ "from_har": "Stillwater_Bayou-huntshowdown.wiki.gg_api.php_Archive [26-07-21 20-21-43].har",
+ "url": "https://huntshowdown.wiki.gg/api.php?action=queryDataMap&format=json&pageid=4930&revid=14175&continue=0&cb=20260403003507",
+ "counts": {
+  "Arsenals": 1,
+  "Beetle_Spawns": 5,
+  "Boss_Lairs": 22,
+  "Brute_Spawns": 5,
+  "Compounds": 16,
+  "Easter_Eggs": 20,
+  "Event_Spawns": 10,
+  "Extraction_Points": 16,
+  "Hunting_Tower": 14,
+  "Rotjaw_Spawns": 16,
+  "Spawn_Points": 26,
+  "Watch_Tower": 3
+ },
+ "categories": {
+  "Compounds": [
+   {
+    "xy": [
+     188.0,
+     108.0
+    ],
+    "label": "Cyprus Huts",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Cyprus Huts"
+   },
+   {
+    "xy": [
+     87.0,
+     326.0
+    ],
+    "label": "Davant Ranch",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Davant Ranch"
+   },
+   {
+    "xy": [
+     55.0,
+     569.0
+    ],
+    "label": "The Slaughterhouse",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/The Slaughterhouse"
+   },
+   {
+    "xy": [
+     181.0,
+     817.0
+    ],
+    "label": "Catfish Grove",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Catfish Grove"
+   },
+   {
+    "xy": [
+     298.0,
+     343.0
+    ],
+    "label": "Pitching Crematorium",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Pitching Crematorium"
+   },
+   {
+    "xy": [
+     287.0,
+     544.0
+    ],
+    "label": "Healing-Waters Church",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Healing-Waters Church"
+   },
+   {
+    "xy": [
+     428.0,
+     755.0
+    ],
+    "label": "Stillwater Bend",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Stillwater Bend"
+   },
+   {
+    "xy": [
+     595.0,
+     232.0
+    ],
+    "label": "Blanchett Graves",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Blanchett Graves"
+   },
+   {
+    "xy": [
+     516.0,
+     450.0
+    ],
+    "label": "Lockbay Docks",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Lockbay Docks"
+   },
+   {
+    "xy": [
+     616.0,
+     571.0
+    ],
+    "label": "Alice Farm",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Alice Farm"
+   },
+   {
+    "xy": [
+     645.0,
+     873.0
+    ],
+    "label": "The Chapel of Madonna Noire",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/The Chapel of Madonna Noire"
+   },
+   {
+    "xy": [
+     818.0,
+     160.0
+    ],
+    "label": "Alain & Son's Fish",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Alain & Son's Fish"
+   },
+   {
+    "xy": [
+     870.0,
+     319.0
+    ],
+    "label": "Reynard Mill & Lumber",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Reynard Mill & Lumber"
+   },
+   {
+    "xy": [
+     750.0,
+     472.0
+    ],
+    "label": "Darrow Livestock",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Darrow Livestock"
+   },
+   {
+    "xy": [
+     823.0,
+     647.0
+    ],
+    "label": "Port Reeker",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Port Reeker"
+   },
+   {
+    "xy": [
+     854.0,
+     842.0
+    ],
+    "label": "Scupper Lake",
+    "desc": "text",
+    "article": "Maps/Stillwater Bayou/Scupper Lake"
+   }
+  ],
+  "Boss_Lairs": [
+   {
+    "xy": [
+     188.0,
+     108.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     82.0,
+     301.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     83.0,
+     348.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     55.0,
+     569.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     181.0,
+     817.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     298.0,
+     343.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     287.0,
+     544.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     428.0,
+     755.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     562.0,
+     232.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     635.0,
+     232.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     516.0,
+     450.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     614.0,
+     552.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     612.0,
+     592.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     645.0,
+     873.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     818.0,
+     160.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     878.0,
+     298.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     863.0,
+     341.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     750.0,
+     472.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     835.0,
+     616.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     799.0,
+     631.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     813.0,
+     691.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     854.0,
+     842.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   }
+  ],
+  "Rotjaw_Spawns": [
+   {
+    "xy": [
+     97.0,
+     87.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     294.0,
+     174.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     454.0,
+     222.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     550.0,
+     58.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     592.0,
+     378.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     760.0,
+     242.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     900.0,
+     428.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     880.0,
+     644.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     771.0,
+     755.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     760.0,
+     862.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     611.0,
+     721.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     532.0,
+     872.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     480.0,
+     932.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     350.0,
+     598.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     164.0,
+     743.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     209.0,
+     966.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   }
+  ],
+  "Spawn_Points": [
+   {
+    "xy": [
+     46.0,
+     129.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     13.0,
+     234.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     15.0,
+     442.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     17.0,
+     683.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     44.0,
+     748.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     48.0,
+     848.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     189.0,
+     985.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     352.0,
+     940.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     450.0,
+     905.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     541.0,
+     963.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     740.0,
+     956.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     857.0,
+     947.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     933.0,
+     950.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     952.0,
+     875.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     970.0,
+     739.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     985.0,
+     566.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     894.0,
+     504.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     973.0,
+     428.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     993.0,
+     309.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     939.0,
+     169.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     870.0,
+     55.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     708.0,
+     35.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     582.0,
+     54.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     451.0,
+     36.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     284.0,
+     46.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     231.0,
+     32.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   }
+  ],
+  "Extraction_Points": [
+   {
+    "xy": [
+     30.0,
+     115.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     154.0,
+     58.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     284.0,
+     7.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     511.0,
+     80.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     668.0,
+     43.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     936.0,
+     105.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     968.0,
+     276.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     968.0,
+     524.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     966.0,
+     709.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     940.0,
+     970.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     750.0,
+     976.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     435.0,
+     933.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     205.0,
+     915.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     82.0,
+     775.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     18.0,
+     467.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     441.0,
+     566.0
+    ],
+    "label": "",
+    "desc": "Web of the Empress Event Post Malone's Murder Circus Encore Event",
+    "article": ""
+   }
+  ],
+  "Watch_Tower": [
+   {
+    "xy": [
+     393.0,
+     153.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     439.0,
+     342.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     426.0,
+     591.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   }
+  ],
+  "Hunting_Tower": [
+   {
+    "xy": [
+     115.0,
+     76.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     302.0,
+     86.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     323.0,
+     200.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     348.0,
+     389.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     207.0,
+     425.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     95.0,
+     743.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     140.0,
+     903.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     317.0,
+     840.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     304.0,
+     709.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     394.0,
+     797.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     527.0,
+     700.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     770.0,
+     936.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     787.0,
+     744.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     976.0,
+     380.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   }
+  ],
+  "Arsenals": [
+   {
+    "xy": [
+     464.0,
+     770.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   }
+  ],
+  "Beetle_Spawns": [
+   {
+    "xy": [
+     196.0,
+     469.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     247.0,
+     657.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     504.0,
+     395.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     660.0,
+     504.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     447.0,
+     272.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   }
+  ],
+  "Brute_Spawns": [
+   {
+    "xy": [
+     200.0,
+     200.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     290.0,
+     425.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     410.0,
+     860.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     566.0,
+     740.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     735.0,
+     545.0
+    ],
+    "label": "",
+    "desc": "",
+    "article": ""
+   }
+  ],
+  "Easter_Eggs": [
+   {
+    "xy": [
+     73.0,
+     14.0
+    ],
+    "label": "Jack & Rose on the raft",
+    "desc": "From the movie Titanic",
+    "article": ""
+   },
+   {
+    "xy": [
+     208.0,
+     190.0
+    ],
+    "label": "Man grown into tree",
+    "desc": "Reference to the character Jim from the series The Walking Dead",
+    "article": ""
+   },
+   {
+    "xy": [
+     282.0,
+     169.0
+    ],
+    "label": "Doll and duck waving",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     28.0,
+     364.0
+    ],
+    "label": "Pizza plate",
+    "desc": "Reference to the pizza on the rooftop from the series Breaking Bad",
+    "article": ""
+   },
+   {
+    "xy": [
+     35.0,
+     592.0
+    ],
+    "label": "Caged man",
+    "desc": "From the movie Saw",
+    "article": ""
+   },
+   {
+    "xy": [
+     194.0,
+     694.0
+    ],
+    "label": "Open grave",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     198.0,
+     730.0
+    ],
+    "label": "Doll house",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     134.0,
+     945.0
+    ],
+    "label": "Person rowing in a coffin",
+    "desc": "From the movie Pirates of the Carribean: Dead Men's Chest",
+    "article": ""
+   },
+   {
+    "xy": [
+     273.0,
+     724.0
+    ],
+    "label": "Two dolls with a duck in a wheelbarrow",
+    "desc": "Reference to german cartoon 'Herren im Bad' (Gentleman in the tub) from Loriot",
+    "article": ""
+   },
+   {
+    "xy": [
+     322.0,
+     324.0
+    ],
+    "label": "Children holding hands",
+    "desc": "From the movie Shining",
+    "article": ""
+   },
+   {
+    "xy": [
+     337.0,
+     40.0
+    ],
+    "label": "Cabin",
+    "desc": "From the movie Evil Dead",
+    "article": ""
+   },
+   {
+    "xy": [
+     551.0,
+     1.0
+    ],
+    "label": "Steamboat wreck",
+    "desc": "(outside of the map)",
+    "article": ""
+   },
+   {
+    "xy": [
+     770.0,
+     27.0
+    ],
+    "label": "Privacy Please ducks",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     565.0,
+     197.0
+    ],
+    "label": "Mahjong players",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     704.0,
+     170.0
+    ],
+    "label": "Jacob Ortiz Sullivan tombstone",
+    "desc": "Probably a reference to a character from the game Red Dead Redemption 2",
+    "article": ""
+   },
+   {
+    "xy": [
+     618.0,
+     238.0
+    ],
+    "label": "Weeping Angels",
+    "desc": "From the series Doctor Who",
+    "article": ""
+   },
+   {
+    "xy": [
+     975.0,
+     650.0
+    ],
+    "label": "Scene from the movie Django Unchained",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     811.0,
+     700.0
+    ],
+    "label": "Big duck",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     809.0,
+     691.0
+    ],
+    "label": "Climbing doll",
+    "desc": "",
+    "article": ""
+   },
+   {
+    "xy": [
+     733.0,
+     936.0
+    ],
+    "label": "Sven Ulrich plaque",
+    "desc": "Crytek Developer",
+    "article": ""
+   }
+  ],
+  "Event_Spawns": [
+   {
+    "xy": [
+     441.0,
+     603.0
+    ],
+    "label": "",
+    "desc": "Desolation's Wake Event Scorched Earth Event",
+    "article": ""
+   },
+   {
+    "xy": [
+     176.0,
+     589.0
+    ],
+    "label": "",
+    "desc": "Post Malone's Murder Circus Event Garden of the Witch Event Judgement of The Fool Event Post Malone's Murder Circus Encore Event",
+    "article": ""
+   },
+   {
+    "xy": [
+     481.0,
+     639.0
+    ],
+    "label": "",
+    "desc": "Post Malone's Murder Circus Event Garden of the Witch Event Judgement of The Fool Event Post Malone's Murder Circus Encore Event",
+    "article": ""
+   },
+   {
+    "xy": [
+     666.0,
+     457.0
+    ],
+    "label": "",
+    "desc": "Post Malone's Murder Circus Event Garden of the Witch Event Judgement of The Fool Event Post Malone's Murder Circus Encore Event",
+    "article": ""
+   },
+   {
+    "xy": [
+     332.0,
+     429.0
+    ],
+    "label": "",
+    "desc": "Web of the Empress Event",
+    "article": ""
+   },
+   {
+    "xy": [
+     533.0,
+     616.0
+    ],
+    "label": "",
+    "desc": "Web of the Empress Event",
+    "article": ""
+   },
+   {
+    "xy": [
+     707.0,
+     588.0
+    ],
+    "label": "",
+    "desc": "Web of the Empress Event",
+    "article": ""
+   },
+   {
+    "xy": [
+     322.0,
+     475.0
+    ],
+    "label": "",
+    "desc": "Devil's Trail Event",
+    "article": ""
+   },
+   {
+    "xy": [
+     680.0,
+     416.0
+    ],
+    "label": "",
+    "desc": "Devil's Trail Event",
+    "article": ""
+   },
+   {
+    "xy": [
+     287.0,
+     677.0
+    ],
+    "label": "",
+    "desc": "Devil's Trail Event",
+    "article": ""
+   }
+  ]
+ }
+}
