@@ -3,7 +3,7 @@
 A self-contained recreation of the interactive maps at `https://hunt.kamille.ovh/maps/`,
 rebuilt from the captured HAR archive plus a live inspection of the page's DOM and CSS.
 
-Version: **1.3.1**
+Version: **1.3.2**
 
 ---
 
@@ -84,6 +84,8 @@ Everything that works without a backend:
 - deep links: `#m=<mapId>&p=<poiId>`
 
 **Tools**
+- screenshot filter: All plus camera / struck-camera icons, because the
+  translated words wrap in CJK inside the rail; the wording is in the tooltip
 - ruler: two-point distance in metres, unlimited measurements, right-click to delete
 - route: multi-point path with running total, `Enter` or Finish to close
 - spotlight: dims everything but a circle around the cursor
@@ -116,9 +118,18 @@ Marker colours have two modes, switchable under Settings -> Marker palette:
 
 ### Languages
 
-14 languages, switchable from the top bar. The **selection is stored in a
-cookie** (`hm_lang`, 10 years, `SameSite=Lax`), so it survives independently of
-the per-device map settings in `localStorage`.
+14 languages, switchable from the top bar, each with an inline SVG flag.
+Emoji flags are not usable: Windows' Segoe UI Emoji has no regional-indicator
+glyphs and renders the pair as the two letter codes, so they are drawn in
+[js/flags.js](huntmap/js/flags.js) instead.
+
+**UI state persists in cookies** via [js/store.js](huntmap/js/store.js), so it
+survives a session: language (`hm_lang`), POI type filters, names/compounds
+toggles, screenshot filter, settings, last map, and experimental mode with its
+own filters. Existing `localStorage` values are migrated across once.
+
+POI highlights and experimental position overrides stay in `localStorage` on
+purpose - both can outgrow a 4 KB cookie.
 
 Nothing is machine-translated. `tools/build_i18n.py` pulls each string out of
 Hunt's own language paks through a curated key map, and anything without a

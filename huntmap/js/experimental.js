@@ -15,9 +15,15 @@
 (function (global) {
   'use strict';
 
-  var LS_ON = 'hm.x.on';
-  var LS_TYPES = 'hm.x.types';
+  /* mode + type filters persist in cookies so they survive a session;
+     the position overrides stay in localStorage because they can grow past
+     what a cookie can hold */
+  var CK_ON = 'hm_x_on';
+  var CK_TYPES = 'hm_x_types';
   var LS_MOVES = 'hm.x.moves';
+
+  var LS_ON = 'hm.x.on';          // legacy, migrated once
+  var LS_TYPES = 'hm.x.types';
 
   var api = null;             // bridge from app.js
   var data = {};              // mapId -> raw json
@@ -31,14 +37,7 @@
   var editing = false;
 
   function store(k, v) {
-    try {
-      if (v === undefined) {
-        var raw = localStorage.getItem(k);
-        return raw == null ? null : JSON.parse(raw);
-      }
-      localStorage.setItem(k, JSON.stringify(v));
-    } catch (e) { /* private mode */ }
-    return null;
+    return global.HuntStore.local(k, v);
   }
 
   var $ = function (s) { return document.querySelector(s); };
@@ -367,7 +366,7 @@
         on[k] = !on[k];
         row.classList.toggle('is-on', on[k]);
         row.querySelector('.switch').classList.toggle('is-on', on[k]);
-        store(LS_TYPES, on);
+        global.HuntStore.set(CK_TYPES, on);
         applyFilters();
       });
     }
@@ -377,7 +376,7 @@
         var any = order.some(function (k) { return on[k]; });
         order.forEach(function (k) { on[k] = !any; });
         buildRail();
-        store(LS_TYPES, on);
+        global.HuntStore.set(CK_TYPES, on);
         applyFilters();
         all.textContent = any ? 'Enable all' : 'Disable all';
       });
@@ -399,9 +398,12 @@
   var X = {
     attach: function (bridge) {
       api = bridge;
-      enabled = !!store(LS_ON);
+      var CS = global.HuntStore;
+      CS.migrate(CK_ON, LS_ON);
+      CS.migrate(CK_TYPES, LS_TYPES);
+      enabled = !!CS.get(CK_ON);
       moves = store(LS_MOVES) || {};
-      var savedTypes = store(LS_TYPES);
+      var savedTypes = CS.get(CK_TYPES);
       if (savedTypes) on = savedTypes;
       wire();
       return X;
@@ -412,7 +414,7 @@
 
     setEnabled: function (v) {
       enabled = !!v;
-      store(LS_ON, enabled);
+      global.HuntStore.set(CK_ON, enabled);
       var panel = $('#xPanel');
       if (panel) panel.hidden = !enabled;
       if (!enabled) {

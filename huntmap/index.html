@@ -90,9 +90,17 @@
           <span data-i18n="photos">Screenshots</span>
         </span>
         <div class="seg filter-image-seg">
-          <button class="seg-btn is-on" type="button" data-photo="all"     data-i18n="photo_all">All</button>
-          <button class="seg-btn"       type="button" data-photo="has"     data-i18n="photo_has">w/</button>
-          <button class="seg-btn"       type="button" data-photo="missing" data-i18n="photo_missing">w/o</button>
+          <button class="seg-btn is-on" type="button" data-photo="all" data-i18n="photo_all">All</button>
+          <!-- with / without stay iconic: the translated words wrap in CJK
+               inside a 290px rail, so the wording moves to the tooltip -->
+          <button class="seg-btn seg-ico" type="button" data-photo="has"
+                  data-i18n-title="photo_has" title="with a photo">
+            <svg viewBox="0 0 24 24"><path d="M3 8h4l1.5-2h7L17 8h4v11H3z"/><circle cx="12" cy="13" r="3.2"/></svg>
+          </button>
+          <button class="seg-btn seg-ico" type="button" data-photo="missing"
+                  data-i18n-title="photo_missing" title="without a photo">
+            <svg viewBox="0 0 24 24"><path d="M3 8h4l1.5-2h7L17 8h4v11H3z"/><circle cx="12" cy="13" r="3.2"/><path d="M4 4l16 16"/></svg>
+          </button>
         </div>
       </div>
 
@@ -331,6 +339,8 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="js/store.js"></script>
+<script src="js/flags.js"></script>
 <script src="js/theme.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/experimental.js"></script>
