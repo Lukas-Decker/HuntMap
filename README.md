@@ -3,7 +3,7 @@
 A self-contained recreation of the interactive maps at `https://hunt.kamille.ovh/maps/`,
 rebuilt from the captured HAR archive plus a live inspection of the page's DOM and CSS.
 
-Version: **1.3.0**
+Version: **1.3.1**
 
 ---
 
@@ -139,10 +139,20 @@ python tools/build_i18n.py --suggest  # propose new keymap pairings
   every key that is still English. This is the page to read when hunting for
   wrong or missing conversions.
 
-Of 205 UI keys, 14 currently have a genuine game equivalent (POI type names and
-a few commands like Filters / Settings / Cancel). The rest are map-tool wording
-the game has no string for. Add pairings to `keymap.json` as you find them, or
-translate directly in `overrides.json`.
+- `sources/i18n/manual/<lang>.json` - translations for the keys the game has
+  no string for. These sit **below** the game strings, so adding a pairing to
+  `keymap.json` later automatically replaces a hand-written string with the
+  authentic one.
+
+Precedence: **English < manual < site < game < overrides**.
+
+Only the 64 keys the app actually renders are translated; the other 140 belong
+to the login / draft / moderation features never recreated here. Of those 64,
+16 resolve to real game strings and 52 are hand-written. French is left alone -
+the site HAR already ships a real translation of this exact UI.
+
+When judging a pairing, go by the game string's **English value, not its key
+name**: `ui_monsters_bears` really does read "Brutes".
 
 Reading the paks is done here rather than via Hunt-ify's `Localizer`: each row
 is `key | English source | translation`, and that loader returns column 3, which

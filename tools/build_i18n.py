@@ -145,6 +145,21 @@ def load_keymap(path):
             if not k.startswith("_") and isinstance(v, str)}
 
 
+def load_manual(dir_path, code):
+    """Hand-written translations for keys the game has no string for.
+
+    These sit BELOW the game strings on purpose: if a real pairing exists or
+    gets added later, the authentic game wording wins automatically.
+    """
+    path = dir_path / (code + ".json")
+    if not path.is_file():
+        return {}
+    with path.open(encoding="utf-8") as fh:
+        raw = json.load(fh)
+    return {k: v for k, v in raw.items()
+            if not k.startswith("_") and isinstance(v, str) and v.strip()}
+
+
 def load_overrides(path):
     if not path.is_file():
         return {}
@@ -170,17 +185,39 @@ def build(root, huntify):
     overrides = load_overrides(root / "sources" / "i18n" / "overrides.json")
     paks, missing_paks = load_all_paks(huntify)
 
+    # the site's translation file is missing a few keys the app needs
+    # (poi_types.extraction for one). A pairing may therefore introduce a key;
+    # its English text then comes from the game's own English pak.
+    en_pak = paks.get("en", {})
+    for ui_key, game_key in keymap.items():
+        if ui_key in en_flat or ui_key.startswith("x_"):
+            continue
+        seed = (en_pak.get(game_key) or {}).get("en", "").strip()
+        if seed:
+            en_flat[ui_key] = seed
+
     langs, provenance, drift = {}, {}, []
+
+    manual_dir = root / "sources" / "i18n" / "manual"
 
     for code in LANGS:
         flat = dict(en_flat)                       # English is the floor
         src = {k: "english" for k in en_flat}
 
-        if code == "fr" and fr_flat:               # the HAR shipped real French
+        # 1. hand-written translations for what the game has no string for
+        if code != "en":
+            for k, v in load_manual(manual_dir, code).items():
+                if k in flat or k.startswith("x_"):
+                    flat[k] = v
+                    src[k] = "manual"
+
+        # 2. the site's own French, which is a real translation of this UI
+        if code == "fr" and fr_flat:
             for k, v in fr_flat.items():
                 flat[k] = v
                 src[k] = "site"
 
+        # 3. the game's own strings, the most authentic source we have
         table = paks.get(code, {})
         if code != "en" and table:
             for ui_key, game_key in keymap.items():
@@ -197,10 +234,10 @@ def build(root, huntify):
                 if en_entry and entry.get("en") and \
                         en_entry.get("en", "").strip() != entry["en"].strip():
                     drift.append((code, ui_key, game_key))
-                if ui_key in flat or ui_key.startswith("x_"):
-                    flat[ui_key] = text
-                    src[ui_key] = "game:" + game_key
+                flat[ui_key] = text
+                src[ui_key] = "game:" + game_key
 
+        # 4. your manual corrections, which beat everything above
         for k, v in (overrides.get(code) or {}).items():
             if isinstance(v, str) and v.strip():
                 flat[k] = v
@@ -260,15 +297,17 @@ def write_review(root, result):
 
     # ---- coverage -------------------------------------------------------
     L.append("## Coverage\n")
-    L.append("| language | from game | from site | override | English fallback |")
-    L.append("|---|--:|--:|--:|--:|")
+    L.append("| language | from game | translated | from site | override | "
+             "English fallback |")
+    L.append("|---|--:|--:|--:|--:|--:|")
     for code in LANGS:
         src = prov[code]
         g = sum(1 for v in src.values() if v.startswith("game:"))
+        m = sum(1 for v in src.values() if v == "manual")
         s = sum(1 for v in src.values() if v == "site")
         o = sum(1 for v in src.values() if v == "override")
         e = sum(1 for v in src.values() if v == "english")
-        L.append(f"| `{code}` {LANGS[code][0]} | {g} | {s} | {o} | {e} |")
+        L.append(f"| `{code}` {LANGS[code][0]} | {g} | {m} | {s} | {o} | {e} |")
     L.append("")
     L.append(f"Total UI keys: **{len(en)}**. Pairings in the key map: "
              f"**{len(keymap)}**.\n")
@@ -413,10 +452,12 @@ def main(argv=None):
         for code in LANGS:
             src = prov[code]
             g = sum(1 for v in src.values() if v.startswith("game:"))
+            m = sum(1 for v in src.values() if v == "manual")
             o = sum(1 for v in src.values() if v == "override")
-            s = sum(1 for v in src.values() if v == "site")
-            print(f'   {code:8} {LANGS[code][0]:16} game {g:3}  site {s:3}  '
-                  f'override {o:3}')
+            si = sum(1 for v in src.values() if v == "site")
+            e = sum(1 for v in src.values() if v == "english")
+            print(f'   {code:8} {LANGS[code][0]:16} game {g:3}  translated {m:3}'
+                  f'  site {si:3}  override {o:3}  english {e:3}')
         if result["missing_paks"]:
             print("missing paks:", ", ".join(result["missing_paks"]))
         print(f'\n  {ui_path}')

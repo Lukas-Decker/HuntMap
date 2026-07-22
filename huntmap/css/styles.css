@@ -209,12 +209,15 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
 }
 .lang-menu button:hover { background: var(--surface-3); }
 .lang-menu button.active { color: var(--accent-hi); }
-.lang-code {
-  font: 10px/1 var(--font-mono); text-transform: uppercase;
-  color: var(--text-dim); min-width: 44px; letter-spacing: .5px;
+.lang-flag {
+  font-size: 15px; line-height: 1; min-width: 22px;
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
 }
-.lang-menu button.active .lang-code { color: var(--accent); }
 .lang-name { flex: 1; }
+#langCurrent {
+  font-size: 15px; line-height: 1;
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+}
 
 /* ============================== layout ============================= */
 

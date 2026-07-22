@@ -36,6 +36,23 @@
   /* cookies (language is asked to persist independently of localStorage) */
   var CK = { lang: 'hm_lang' };
 
+  /* Flags are built from a region code at runtime rather than pasted as
+     emoji, so the source stays plain ASCII. zh-Hans / zh-Hant and pt-BR are
+     script or region variants, so each gets the region it actually ships for. */
+  var FLAG_CC = {
+    'en': 'GB', 'de': 'DE', 'fr': 'FR', 'es': 'ES', 'it': 'IT', 'pl': 'PL',
+    'ru': 'RU', 'uk': 'UA', 'tr': 'TR', 'pt-BR': 'BR', 'ja': 'JP', 'ko': 'KR',
+    'zh-Hans': 'CN', 'zh-Hant': 'TW'
+  };
+
+  function flagFor(code) {
+    var cc = FLAG_CC[code];
+    if (!cc) return '\u2691';                       // generic flag
+    return String.fromCodePoint(
+      0x1F1E6 + cc.charCodeAt(0) - 65,
+      0x1F1E6 + cc.charCodeAt(1) - 65);
+  }
+
   /* ---------------------------------------------------------------- */
   /* state                                                            */
   /* ---------------------------------------------------------------- */
@@ -180,7 +197,8 @@
       if (v != null) { el.title = v; el.setAttribute('aria-label', v); }
     });
     $('#searchInput').placeholder = t('search_location');
-    $('#langCurrent').textContent = S.lang.toUpperCase();
+    $('#langCurrent').textContent = flagFor(S.lang);
+    $('#langCurrent').title = S.langNames[S.lang] || S.lang;
     $$('#langMenu button').forEach(function (b) {
       b.classList.toggle('active', b.dataset.lang === S.lang);
     });
@@ -261,7 +279,7 @@
     if (!menu) return;
     menu.innerHTML = Object.keys(S.langNames).map(function (code) {
       return '<button type="button" data-lang="' + esc(code) + '">'
-           + '<span class="lang-code">' + esc(code) + '</span>'
+           + '<span class="lang-flag">' + flagFor(code) + '</span>'
            + '<span class="lang-name">' + esc(S.langNames[code]) + '</span>'
            + '</button>';
     }).join('');
@@ -615,7 +633,7 @@
     });
 
     var chips = $('#filterChips');
-    chips.innerHTML = S.typeOrder.filter(function (k) { return k !== 'compound'; })
+    chips.innerHTML = sortedTypes()
       .map(function (k) {
         return '<button class="filter-row' + (S.on[k] ? ' is-on' : '') + '" type="button" data-type="' + k + '"'
              + ' style="' + colorVars(k) + '">'
@@ -684,11 +702,39 @@
     refreshTypeLabels();
   }
 
+  /* filter rows read A-Z by the label actually shown, so the order follows
+     the active language instead of the order the data happens to be in */
+  function sortedTypes() {
+    var names = S.t.poi_types || {};
+    var label = function (k) {
+      return String(names[k] || (S.types[k] && S.types[k].label) || k);
+    };
+    return S.typeOrder
+      .filter(function (k) { return k !== 'compound'; })
+      .sort(function (a, b) {
+        return label(a).localeCompare(label(b), S.lang, { sensitivity: 'base' });
+      });
+  }
+
   function refreshTypeLabels() {
     var names = S.t.poi_types || {};
     $$('[data-poi-label]').forEach(function (el) {
       var k = el.dataset.poiLabel;
       el.textContent = names[k] || S.types[k].label;
+    });
+    reorderTypeRows();
+  }
+
+  /* Re-sort the existing rows in place after a language change. buildRail()
+     would also do it, but it binds its click handler to the container, so
+     calling it twice would double-fire every toggle. */
+  function reorderTypeRows() {
+    var chips = $('#filterChips');
+    if (!chips) return;
+    var order = sortedTypes();
+    order.forEach(function (k) {
+      var row = $('.filter-row[data-type="' + k + '"]', chips);
+      if (row) chips.appendChild(row);
     });
   }
 
