@@ -3,7 +3,7 @@
 A self-contained recreation of the interactive maps at `https://hunt.kamille.ovh/maps/`,
 rebuilt from the captured HAR archive plus a live inspection of the page's DOM and CSS.
 
-Version: **1.2.0**
+Version: **1.3.0**
 
 ---
 
@@ -91,7 +91,7 @@ Everything that works without a backend:
 - shortcuts: `1`-`6` tools, `F` fullscreen, `/` search, `Esc` cancel, `+` / `-` zoom
 
 **Other**
-- English and French, straight from the site's own translation file
+- 14 languages from the game's own language paks, language stored in a cookie
 - filters, language, map, options and highlights persist in `localStorage`
 
 ### Deliberately not recreated
@@ -114,6 +114,40 @@ Marker colours have two modes, switchable under Settings -> Marker palette:
 
 `poi-types.json` itself is never modified; the warm set is an overlay table.
 
+### Languages
+
+14 languages, switchable from the top bar. The **selection is stored in a
+cookie** (`hm_lang`, 10 years, `SameSite=Lax`), so it survives independently of
+the per-device map settings in `localStorage`.
+
+Nothing is machine-translated. `tools/build_i18n.py` pulls each string out of
+Hunt's own language paks through a curated key map, and anything without a
+pairing falls back to English:
+
+```powershell
+python tools/build_i18n.py            # -> huntmap/i18n/ui.json + REVIEW.md
+python tools/build_i18n.py --suggest  # propose new keymap pairings
+```
+
+- `sources/i18n/keymap.json` - map UI key -> game `ui_*` key. Hand-curated,
+  because matching purely on English text is unreliable: it pairs "Brutes" with
+  the game's word for bears and "Beetles" with the consumable item.
+- `sources/i18n/overrides.json` - **your manual layer.** Anything you put here
+  wins over the game string and over the English fallback.
+- `sources/i18n/REVIEW.md` - generated. Every mapped key with its English text
+  and what each of the 13 languages resolved to, side by side, plus a list of
+  every key that is still English. This is the page to read when hunting for
+  wrong or missing conversions.
+
+Of 205 UI keys, 14 currently have a genuine game equivalent (POI type names and
+a few commands like Filters / Settings / Cancel). The rest are map-tool wording
+the game has no string for. Add pairings to `keymap.json` as you find them, or
+translate directly in `overrides.json`.
+
+Reading the paks is done here rather than via Hunt-ify's `Localizer`: each row
+is `key | English source | translation`, and that loader returns column 3, which
+silently yields English for every non-English pak.
+
 ---
 
 ## 3. Running it
@@ -134,7 +168,60 @@ Map images and boundary overlays are local, so the map itself renders offline.
 
 ---
 
-## 4. Comparing against other POI sources
+## 4. Experimental mode
+
+Off by default; enable it under Settings. It adds a separate **Experimental**
+section to the filter rail holding POIs mined straight from the Hunt level
+files, drawn with a dashed outline and a corner tick so they are never confused
+with the community data.
+
+| type | Stillwater | Lawson | DeSalle | Mammon's |
+|---|--:|--:|--:|--:|
+| Cargo Crates | 28 | 33 | 24 | 50 |
+| Cargo Balloons | 10 | 10 | 10 | 10 |
+| Weapon Crates | 73 | 44 | 63 | 60 |
+| Water Crates | 9 | 8 | 9 | 8 |
+| Balloon Supports | 6 | 6 | 6 | 5 |
+
+```powershell
+python tools/extract_cargo_pois.py     # -> huntmap/experimental/<map>.json
+```
+
+None of this comes from Hunt-ify's `structured/maps`: its extractor reads only
+`mission_mission0.xml` plus `bm_*extraction*`, so the ~345 `optional/` layer
+files per map - where every crate lives - were never mined. The `rs_*` layers
+are variant sets the game picks a subset from, so the source layer is recorded
+on each POI.
+
+### From 3D world coordinates to the square map
+
+Level entities carry a raw world position (`Pos="1123.8,966.7,55.0"`). Hunt-ify's
+stored `fit.affine` is **not** used - it does not even reproduce Hunt-ify's own
+image-space output (242 px off). Instead the transform is solved the same way
+every other source in this repo is: take cash registers, which appear in both
+the level file and the community map and match 87/87, try the eight axis
+orientations and ICP each. The winner on all four maps is
+
+    X ~ 4 * world_y - 2048        Y ~ 4 * world_x - 2048
+
+i.e. world units are metres, transposed. Validated on a **hold-out class the
+fit never saw**: workbenches land at 1.9-3.4 m median (31/32, 36/37, 31/31,
+37/38 within 10 m). All 126/101/112/133 crates land inside the square.
+
+### Reposition editor
+
+Inside Experimental mode, **Edit positions** makes the experimental markers
+draggable. The community POIs stay fixed - `huntmap/data/` is read-only here.
+
+- moves are stored per map in `localStorage`
+- **Export** / **Import** as JSON, **Reset** per map, or revert one POI from its
+  side panel, which also reports how far it was moved
+- a moved marker is tinted and its imported coordinate is kept, so the original
+  is never lost
+
+---
+
+## 5. Comparing against other POI sources
 
 `tools/compare_game_pois.py` diffs the community POI data against two
 independent sources:
@@ -265,7 +352,7 @@ small Markdown renderer is built in).
 
 ---
 
-## 5. Layout
+## 6. Layout
 
 ```
 HuntMap/
@@ -276,14 +363,21 @@ HuntMap/
 │  ├─ index.html
 │  ├─ css/styles.css                    HuntWiki-derived palette
 │  ├─ js/theme.js                       marker palettes (warm / original)
+│  ├─ js/experimental.js                game-mined POIs + reposition editor
+│  ├─ i18n/ui.json                      generated, 14 languages
+│  ├─ experimental/                      generated, crate POIs per map
 │  ├─ js/icons.js                       POI glyphs (original artwork)
 │  ├─ js/app.js                         everything else
 │  ├─ data/                             from the HAR, unmodified except as noted
 │  │  ├─ maps.json  poi-types.json  data-1..4.json  translations.json
 │  └─ images/                           1-4.webp (map art) + 1-4.svg (boundaries)
-├─ sources/wikigg/                      wiki.gg markers extracted from the HARs
+├─ sources/
+│  ├─ wikigg/                           wiki.gg markers extracted from the HARs
+│  └─ i18n/                             keymap + your overrides + REVIEW.md
 ├─ tools/
 │  ├─ extract_wikigg_har.py             wiki.gg HARs -> sources/wikigg/
+│  ├─ extract_cargo_pois.py             level files -> huntmap/experimental/
+│  ├─ build_i18n.py                     game language paks -> huntmap/i18n/
 │  ├─ compare_game_pois.py              diff vs game + wiki data (read-only)
 │  └─ serve_compare.py                  browse the reports at 127.0.0.1:8778
 ├─ compare/                             generated reports (regenerate any time)
@@ -296,7 +390,7 @@ HAR responses.
 
 ---
 
-## 6. Attribution
+## 7. Attribution
 
 Map imagery, boundary overlays, POI data and translations belong to
 `hunt.kamille.ovh` and its contributors; Hunt: Showdown is Crytek's.

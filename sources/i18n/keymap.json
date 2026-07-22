@@ -1,0 +1,33 @@
+{
+  "_comment": [
+    "Map UI key (dotted path into the `maps` translation tree) -> Hunt game",
+    "localization key (ui_*). build_i18n.py resolves each game key in every",
+    "language pak and writes the result into huntmap/i18n/ui.json.",
+    "",
+    "Only add a pairing when the game string genuinely means the same thing.",
+    "A wrong pairing is worse than no pairing: anything absent here simply",
+    "falls back to English, which is correct-but-untranslated rather than",
+    "confidently wrong.",
+    "",
+    "Run `python tools/build_i18n.py --suggest` to see candidate game keys",
+    "matched by English text, then hand-pick from those. Corrections to the",
+    "resolved text itself go in overrides.json, not here."
+  ],
+
+  "poi_types.spawn": "ui_spawnpoint",
+  "poi_types.big_tower": "ui_scouttower",
+  "poi_types.wild_target": "ui_wild_target",
+  "poi_types.brute": "ui_player_profile_avatar_brute",
+  "poi_types.beetle": "ui_player_profile_avatar_beetle",
+  "poi_types.extraction": "ui_hint_extraction_header",
+  "poi_types.circus": "ui_keyterm_circus",
+
+  "x_poi_types.cargo_crate": "ui_hint_cargocrate_header",
+  "x_poi_types.cargo_balloon": "ui_hint_cargoballoon_header",
+
+  "filters": "ui_keyterm_filters",
+  "settings": "ui_options_sidepanel_title",
+  "cancel": "ui_uicommand_cancel",
+  "loading": "ui_loading",
+  "tool_fullscreen": "ui_option_fullscreen"
+}

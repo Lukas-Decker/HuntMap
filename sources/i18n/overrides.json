@@ -1,0 +1,27 @@
+{
+ "_comment": [
+  "Manual corrections, applied after the game strings and always",
+  "winning. Shape: { \"<lang>\": { \"<ui.key.path>\": \"text\" } }.",
+  "Delete or blank an entry to fall back to the generated value.",
+  "See REVIEW.md for every key, its English text and what each",
+  "language currently resolves to."
+ ],
+ "_example": {
+  "de": {
+   "filters": "Filter"
+  }
+ },
+ "de": {},
+ "fr": {},
+ "es": {},
+ "it": {},
+ "pl": {},
+ "ru": {},
+ "uk": {},
+ "tr": {},
+ "pt-BR": {},
+ "ja": {},
+ "ko": {},
+ "zh-Hans": {},
+ "zh-Hant": {}
+}

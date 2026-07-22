@@ -40,10 +40,8 @@
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg>
         <span id="langCurrent">EN</span>
       </button>
-      <div id="langMenu" class="lang-menu">
-        <button type="button" data-lang="en">English</button>
-        <button type="button" data-lang="fr">Fran&ccedil;ais</button>
-      </div>
+      <!-- populated from i18n/ui.json by buildLangMenu() -->
+      <div id="langMenu" class="lang-menu"></div>
     </div>
   </div>
 </header>
@@ -101,6 +99,40 @@
       <div class="filter-foot">
         <span id="filterCount" class="filter-count"></span>
         <span id="filterMissing" class="filter-missing"></span>
+      </div>
+    </section>
+
+    <!-- experimental: only rendered when the mode is enabled -->
+    <section id="xPanel" class="rail-section x-panel" hidden>
+      <div class="filter-panel-head">
+        <h2 class="rail-title x-title">Experimental <span class="x-tag">beta</span></h2>
+        <button id="xToggleAll" class="filter-toggle-all" type="button">Disable all</button>
+      </div>
+
+      <p class="x-note">
+        Mined from the game level files, not community-verified. Positions are
+        derived from 3D world coordinates and may need nudging.
+      </p>
+
+      <div id="xChips" class="filter-rows"></div>
+
+      <div class="x-edit">
+        <button id="xEditBtn" class="btn btn-ghost btn-wide" type="button">
+          <svg class="ui-ico" viewBox="0 0 24 24"><path d="M14.6 1.9 17 4.3 8.2 13.1 5.8 10.7z"/><path d="M5 14l-1 5 5-1"/></svg>
+          <span>Edit positions</span>
+        </button>
+        <div id="xEditTools" class="x-edit-tools" hidden>
+          <span id="xMoveCount" class="x-move-count"></span>
+          <div class="x-edit-row">
+            <button id="xExport" class="btn btn-mini" type="button">Export</button>
+            <button id="xImport" class="btn btn-mini" type="button">Import</button>
+            <button id="xReset" class="btn btn-mini btn-ghost" type="button">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-foot">
+        <span id="xCount" class="filter-count"></span>
       </div>
     </section>
   </aside>
@@ -282,6 +314,11 @@
         </div>
       </div>
       <hr class="opt-sep">
+      <label class="opt-row">
+        <span>Experimental mode<em class="opt-hint">game-mined POIs, editable positions</em></span>
+        <input type="checkbox" id="optExperimental" class="opt-check">
+      </label>
+      <hr class="opt-sep">
       <button id="clearRuler" class="btn btn-ghost btn-wide" type="button" data-i18n="ruler_clear">Clear ruler</button>
       <button id="clearRoutes" class="btn btn-ghost btn-wide" type="button" data-i18n="route_clear">Clear routes</button>
       <button id="clearHighlights" class="btn btn-ghost btn-wide" type="button">Clear highlights</button>
@@ -296,6 +333,7 @@
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="js/theme.js"></script>
 <script src="js/icons.js"></script>
+<script src="js/experimental.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

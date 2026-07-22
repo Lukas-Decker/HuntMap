@@ -10,7 +10,15 @@ Thumbs.db
 
 # generated - regenerate with the tools in tools/
 compare/*.json
-sources/wikigg/*.json    # from the wiki.gg HARs, via extract_wikigg_har.py
+
+# from the wiki.gg HARs, via extract_wikigg_har.py
+sources/wikigg/*.json
+
+# from the Hunt level files, via extract_cargo_pois.py
+huntmap/experimental/*.json
+
+# from the game language paks, via build_i18n.py
+huntmap/i18n/ui.json
 
 # python
 __pycache__/
