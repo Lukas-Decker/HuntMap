@@ -3,13 +3,20 @@
 A self-contained recreation of the interactive maps at `https://hunt.kamille.ovh/maps/`,
 rebuilt from the captured HAR archive plus a live inspection of the page's DOM and CSS.
 
-Version: **1.3.2**
+Version: **1.3.3**
 
 ---
 
 ## 1. What the HAR revealed
 
-`hunt.kamille.ovh_Archive [26-07-21 17-59-46].har` contains 12 requests, all JSON.
+> **The `.har` captures are not in this repo.** A browser HAR records the full
+> request headers of the session that made it, including your `Cookie` header,
+> so these were purged from the history and `*.har` is gitignored. Everything
+> below is what they contained; re-capture from the live site (DevTools ->
+> Network -> Save all as HAR) into the repo root if you need to re-run the
+> extraction.
+
+`hunt.kamille.ovh_Archive [...].har` contained 12 requests, all JSON.
 No HTML or JS was captured, so the runtime behaviour was reconstructed by inspecting
 the live page (DOM tree, computed styles, Leaflet panes) rather than reading its source.
 
@@ -268,6 +275,10 @@ The wiki data arrives as HAR captures of
 each into `sources/wikigg/<map id>.json` (strips the HTML out of labels and
 descriptions, records the page revision).
 
+Those captures are gitignored (see section 1), so `extract_wikigg_har.py`
+exits with `no .har files in <dir>` on a fresh clone until you drop your own
+captures in the repo root.
+
 **It never writes to `huntmap/data/`.** There is a hard guard that aborts if the
 output directory would land inside it; the community data stays the source of
 truth and the report is the only output.
@@ -377,8 +388,7 @@ small Markdown renderer is built in).
 
 ```
 HuntMap/
-├─ hunt.kamille.ovh_Archive [...].har   source capture (the community map)
-├─ *-huntshowdown.wiki.gg_*.har        source captures (the wiki map, 4)
+├─ *.har                                LOCAL ONLY - gitignored, re-capture yourself
 ├─ har_extract/                         raw response bodies pulled out of the HAR
 ├─ huntmap/
 │  ├─ index.html

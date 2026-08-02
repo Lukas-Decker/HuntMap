@@ -1,3 +1,8 @@
+# Browser HAR captures. A HAR stores the full request headers of the session
+# that recorded it, including the Cookie header, so these are never committed.
+# Re-capture into the repo root when you need to re-run extract_wikigg_har.py.
+*.har
+
 # derived from the HAR, regenerate with the snippet in README section 1
 har_extract/
 
