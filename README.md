@@ -3,7 +3,7 @@
 A self-contained recreation of the interactive maps at `https://hunt.kamille.ovh/maps/`,
 rebuilt from the captured HAR archive plus a live inspection of the page's DOM and CSS.
 
-Version: **1.3.3**
+Version: **1.3.4**
 
 ---
 
@@ -431,3 +431,15 @@ The colour scheme comes from the sibling HuntWiki project, and the game-derived
 POI data compared in section 4 comes from Hunt-ify, both local sibling repos.
 The wiki POI data in section 4 belongs to huntshowdown.wiki.gg and its editors;
 it is used here only to cross-check the community map, never merged into it.
+
+## Credits and license
+
+The code in this repository is MIT-licensed, see [LICENSE](LICENSE).
+
+- The maps, POI data and UI design are recreated from
+  [hunt.kamille.ovh](https://hunt.kamille.ovh/maps/), whose community-maintained data
+  this project mirrors for offline use. All credit for the original site, its curated
+  POIs and its screenshots belongs to its operators and contributors.
+- Map imagery and game data derive from Hunt: Showdown 1896 and remain the property
+  of Crytek GmbH. Unofficial fan project, not affiliated with or endorsed by Crytek.
+- The map viewer is built on [Leaflet](https://leafletjs.com/) (BSD-2-Clause).
