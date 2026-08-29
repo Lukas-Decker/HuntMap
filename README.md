@@ -1,5 +1,10 @@
 # HuntMap - interactive Hunt Showdown maps (recreation)
 
+> **Note:** the current, live version of the interactive map is at
+> [map.huntify.win](https://map.huntify.win). This repository is the earlier
+> recreation that served as testbed and data-exploration ground; it is kept
+> for reference.
+
 A self-contained recreation of the interactive maps at `https://hunt.kamille.ovh/maps/`,
 rebuilt from the captured HAR archive plus a live inspection of the page's DOM and CSS.
 
